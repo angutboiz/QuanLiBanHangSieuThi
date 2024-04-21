@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Linq;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
@@ -11,87 +13,141 @@ namespace quanlybanhang1.Class
 {
     internal class Functions
     {
-        public static SqlConnection Con;  //Khai báo đối tượng kết nối 
-        public static void Connect()
+        public static SqlConnection cnn;  //Khai báo đối tượng kết nối 
+        public static SqlDataAdapter da;
+        public static DataTable dt;
+        static SqlDataReader dr;
+        static SqlCommand cmd;
+
+        public static string connectionString = @"Data Source=DESKTOP-8T8L9ET;Initial Catalog=QLBanHangSieuThi;Trusted_Connection=True"; 
+        public static void Connect(string query,DataGridView table)
         {
-            Con = new SqlConnection();   //Khởi tạo đối tượng
-            Con.ConnectionString = @"Data Source=DESKTOP-8T8L9ET;Initial Catalog=QLBanHangSieuThi;TrustServerCertificate=true;";
-                              //Mở kết nối
-            //Kiểm tra kết nối
-            if (Con.State != ConnectionState.Open)
+            try
             {
-                Con.Open();
-                MessageBox.Show("Kết nối thành công!");
-            }
+                cnn = new SqlConnection(connectionString);   //Khởi tạo đối tượng
+                cnn.Open();
+
+                da = new SqlDataAdapter(query, cnn);
+                dt = new DataTable();
+                da.Fill(dt);
+
+                table.DataSource = dt;
+
+                cnn.Close();
                 
-            else MessageBox.Show("Không thể kết nối với dữ liệu!");
-
-        }
-        public static void Disconnect()
-        {
-            if (Con.State == ConnectionState.Open)
-            {
-                Con.Close();   	//Đóng kết nối
-                Con.Dispose(); 	//Giải phóng tài nguyên
-                Con = null;
             }
+            catch (Exception es)
+            {
+                MessageBox.Show(es.ToString());
 
+            }            
         }
 
-        //Lấy dữ liệu vào bảng
-        /* public static DataTable GetDataToTable(string sql)
-          {
-            SqlDataAdapter dap = new SqlDataAdapter(sql, Con); //Định nghĩa đối tượng thuộc lớp SqlDataAdapter
-            //Khai báo đối tượng table thuộc lớp DataTable
-            DataTable table = new DataTable();
-            dap.Fill(table); //Đổ kết quả từ câu lệnh sql vào table
-            return table;
-        }*/
+        public static void Query(string query, DataGridView table, DataTable dataTable)
+        {
+            try
+            {
+                cnn = new SqlConnection(connectionString);
+                cnn.Open();
+
+                da = new SqlDataAdapter(query, cnn);
+                dataTable = new DataTable();
+                da.Fill(dataTable);
+
+                table.DataSource = dataTable;
+
+                cnn.Close();
+
+            }
+            catch (Exception es)
+            {
+                MessageBox.Show(es.ToString());
+
+            }
+        }
+
+        //CRUD, create, read, update and delete, truyền 
+        //thêm queryReloadTable để làm mới data ở table cần
+        public static void ExecCRUD(string query,string queryReloadTable,DataGridView table,string notify)
+        {
+            try
+            {
+                cnn = new SqlConnection(connectionString);
+                cnn.Open();
+
+
+                cmd = new SqlCommand(query, cnn);
+
+                cmd.ExecuteNonQuery();
+
+                if (notify != "") MessageBox.Show(notify);
+                Connect(queryReloadTable,table);
+                cnn.Close();
+
+            }
+            catch (Exception es)
+            {
+                MessageBox.Show(es.ToString());
+
+            }
+        }
+
+        public static bool DatabaseExists()
+        {
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    return true;
+                }
+            }
+            catch (SqlException)
+            {
+                return false;
+            }
+        }
+
         public static DataTable GetDataToTable(string sql)
         {
-            if (Con == null || Con.State != ConnectionState.Open)
+            if (cnn == null || cnn.State != ConnectionState.Open)
             {
                 MessageBox.Show("Kết nối chưa sẵn sàng!");
                 return null;
             }
 
-            SqlDataAdapter dap = new SqlDataAdapter(sql, Con);
+            SqlDataAdapter dap = new SqlDataAdapter(sql, cnn);
             DataTable table = new DataTable();
             dap.Fill(table);
             return table;
         }
-        public static void RunSQL(string sql)
-        {
-            SqlCommand cmd; //Đối tượng thuộc lớp SqlCommand
-            cmd = new SqlCommand();
-            cmd.Connection = Con; //Gán kết nối
-            cmd.CommandText = sql; //Gán lệnh SQL
-            try
-            {
-                cmd.ExecuteNonQuery(); //Thực hiện câu lệnh SQL
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-            }
-            cmd.Dispose();//Giải phóng bộ nhớ
-            cmd = null;
-        }
 
         //Hàm kiểm tra khoá trùng
-        public static bool CheckKey(string sql)
+        public static bool CheckKey(string sqlQuery)
         {
-            SqlDataAdapter dap = new SqlDataAdapter(sql, Con);
-            DataTable table = new DataTable();
-            dap.Fill(table);
-            if (table.Rows.Count > 0)
-                return true;
-            else return false;
+            bool exists = false;
+
+            using (cnn = new SqlConnection(connectionString))
+            {
+                cnn.Open();
+
+                cmd = new SqlCommand(sqlQuery, cnn);
+
+                using (dr = cmd.ExecuteReader())
+                {
+                    if (dr.HasRows)
+                    {
+                        exists = true;
+                    }
+                }
+            }
+
+            return exists;
         }
         public static void RunSqlDel(string sql)
         {
             SqlCommand cmd = new SqlCommand();
-            cmd.Connection = Functions.Con;
+            cmd.Connection = cnn;
             cmd.CommandText = sql;
             try
             {
@@ -124,7 +180,7 @@ namespace quanlybanhang1.Class
         public static string GetFieldValues(string sql)
         {
             string ma = "";
-            SqlCommand cmd = new SqlCommand(sql, Con);
+            SqlCommand cmd = new SqlCommand(sql, cnn);
             SqlDataReader reader;
             reader = cmd.ExecuteReader();
             while (reader.Read())
@@ -211,7 +267,7 @@ namespace quanlybanhang1.Class
 
         public static void FillCombo(string sql, ComboBox cbo, string ma, string ten)
         {
-            SqlDataAdapter dap = new SqlDataAdapter(sql, Con);
+            SqlDataAdapter dap = new SqlDataAdapter(sql, cnn);
             DataTable table = new DataTable();
             dap.Fill(table);
             cbo.DataSource = table;

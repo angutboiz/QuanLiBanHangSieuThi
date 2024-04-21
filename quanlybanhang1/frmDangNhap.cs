@@ -37,7 +37,7 @@ namespace quanlybanhang1
         private void btnLogin_Click(object sender, EventArgs e)
         {
             // Khởi tạo kết nối đến CSDL
-            Functions.Connect();
+           // Functions.Connect();
 
             // Lấy dữ liệu từ các textbox
             string username = txtusername.Text.Trim();
@@ -71,7 +71,7 @@ namespace quanlybanhang1
             }
 
             // Đóng kết nối
-            Functions.Disconnect();
+            //Functions.Disconnect();
 
         }
 

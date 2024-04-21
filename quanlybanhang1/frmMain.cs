@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -15,12 +16,14 @@ namespace quanlybanhang1
     {
         public frmMain()
         {
+           
             InitializeComponent();
         }
 
         private void frmMain_Load(object sender, EventArgs e)
         {
-           Functions.Connect(); //Mở kết nối
+            //Functions.Connect(); //Mở kết nối
+            
         }
 
         
@@ -28,7 +31,7 @@ namespace quanlybanhang1
 
         private void button1_Click(object sender, EventArgs e)
         {
-            Functions.Disconnect(); //Đóng kết nối
+            //Functions.Disconnect(); //Đóng kết nối
             Application.Exit(); //Thoát
         }
 

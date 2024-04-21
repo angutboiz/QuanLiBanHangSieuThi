@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Data;
 using System.Data.SqlClient;
 using quanlybanhang1.Class;
 
@@ -15,7 +14,14 @@ namespace quanlybanhang1
 {
     public partial class frmDMHang : Form
     {
-        DataTable tblH; //Bảng hàng
+        SqlConnection cnn;
+        SqlDataAdapter da;
+        DataTable dt;
+        SqlDataReader dr;
+        SqlCommand cmd;
+        string connectionString = @"Data Source=DESKTOP-8T8L9ET;Initial Catalog=QLBanHangSieuThi;Trusted_Connection=True";
+
+        string queryTable = "select mahh,tenhh,gianhap,giaban,soluong,ghichu,hinhanh from hanghoa where isRemove = 0";
         public frmDMHang()
         {
             InitializeComponent();
@@ -23,14 +29,18 @@ namespace quanlybanhang1
 
         private void frmDMHang_Load(object sender, EventArgs e)
         {
-            string sql;
-            sql = "SELECT * from tblChatLieu";
-            txtMaHang.Enabled = false;
-            btnLuu.Enabled = false;
-            btnBoQua.Enabled = false;
-            LoadDataGridView();
-           
-            ResetValues();
+            if (Functions.DatabaseExists())
+            {
+                txtMaHang.Enabled = false;
+                btnBoQua.Enabled = false;
+
+                Query(queryTable);
+            }
+            else
+            {
+                MessageBox.Show("Cơ sở dữ liệu không tồn tại hoặc không thể kết nối.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Close();
+            }
         }
 
         private void ResetValues()
@@ -41,188 +51,139 @@ namespace quanlybanhang1
             txtSoLuong.Text = "0";
             txtDonGiaNhap.Text = "0";
             txtDonGiaBan.Text = "0";
-            txtSoLuong.Enabled = true;
-            txtDonGiaNhap.Enabled = false;
-            txtDonGiaBan.Enabled = false;
-            txtAnh.Text = "";
+            
+            txtGhiChu.Text = "";
             picAnh.Image = null;
-            txtGhichu.Text = "";
+            txtAnh.Text = "";
         }
 
 
-        private void LoadDataGridView()
+        private void Query(string query)
         {
-            string sql;
-            sql = "SELECT * from tblHang";
-            tblH = Functions.GetDataToTable(sql);
-            dgvHang.DataSource = tblH;
-            dgvHang.Columns[0].HeaderText = "Mã hàng";
-            dgvHang.Columns[1].HeaderText = "Tên hàng";
-            dgvHang.Columns[2].HeaderText = "Số lượng";
-            dgvHang.Columns[3].HeaderText = "Đơn giá nhập";
-            dgvHang.Columns[4].HeaderText = "Đơn giá bán";
-            dgvHang.Columns[5].HeaderText = "Ảnh";
-            dgvHang.Columns[6].HeaderText = "Tệp";
-            dgvHang.Columns[0].Width = 80;
-            dgvHang.Columns[1].Width = 140;
-            dgvHang.Columns[2].Width = 80;
-            dgvHang.Columns[3].Width = 100;
-            dgvHang.Columns[4].Width = 100;
-            dgvHang.Columns[5].Width = 200;
-            dgvHang.Columns[6].Width = 300;
-            dgvHang.AllowUserToAddRows = false;
-            dgvHang.EditMode = DataGridViewEditMode.EditProgrammatically;
-        }
-
-        private void panel1_Paint_1(object sender, PaintEventArgs e)
-        {
-
-        }
-
-        private void txtTenHang_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void dgvHang_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-            string MaChatLieu;
-            string sql;
-            if (btnThem.Enabled == false)
+            try
             {
-                MessageBox.Show("Đang ở chế độ thêm mới!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                txtMaHang.Focus();
-                return;
+                cnn = new SqlConnection(connectionString);
+                cnn.Open();
+
+                da = new SqlDataAdapter(query, cnn);
+                dt = new DataTable();
+                da.Fill(dt);
+
+                dgvHang.DataSource = dt;
+
+                cnn.Close();
+
             }
-            if (tblH.Rows.Count == 0)
+            catch (Exception es)
             {
-                MessageBox.Show("Không có dữ liệu!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
+                MessageBox.Show(es.ToString());
+
             }
-            txtMaHang.Text = dgvHang.CurrentRow.Cells["MaHang"].Value.ToString();
-            txtTenHang.Text = dgvHang.CurrentRow.Cells["TenHang"].Value.ToString();
-            
-            
-            txtSoLuong.Text = dgvHang.CurrentRow.Cells["SoLuong"].Value.ToString();
-            txtDonGiaNhap.Text = dgvHang.CurrentRow.Cells["DonGiaNhap"].Value.ToString();
-            txtDonGiaBan.Text = dgvHang.CurrentRow.Cells["DonGiaBan"].Value.ToString();
-            sql = "SELECT Anh FROM tblHang WHERE MaHang=N'" + txtMaHang.Text + "'";
-            txtAnh.Text = Functions.GetFieldValues(sql);
-            picAnh.Image = Image.FromFile(txtAnh.Text);
-            sql = "SELECT Ghichu FROM tblHang WHERE MaHang = N'" + txtMaHang.Text + "'";
-            txtGhichu.Text = Functions.GetFieldValues(sql);
-            btnSua.Enabled = true;
-            btnXoa.Enabled = true;
-            btnBoQua.Enabled = true;
+        }
+
+        private void ExecCRUD(string query, string notify)
+        {
+            try
+            {
+                cnn = new SqlConnection(connectionString);
+                cnn.Open();
+
+                cmd = new SqlCommand(query, cnn);
+
+                cmd.ExecuteNonQuery();
+
+                if (notify != "") MessageBox.Show(notify);
+
+                cnn.Close();
+
+            }
+            catch (Exception es)
+            {
+                MessageBox.Show(es.ToString());
+
+            }
         }
 
         private void btnThem_Click(object sender, EventArgs e)
         {
-            btnSua.Enabled = false;
-            btnXoa.Enabled = false;
+            if (CheckValidation())
+            {
+                string query = "INSERT INTO hanghoa (tenhh,gianhap,giaban,soluong,ghichu,hinhanh) VALUES(N'" + txtTenHang.Text +
+                    "'," + float.Parse(txtDonGiaNhap.Text) + "," + float.Parse(txtDonGiaBan.Text) +
+                    "," + int.Parse(txtSoLuong.Text) + ",'" + txtGhiChu.Text + "',N'" + txtAnh.Text.Trim() + "')";
+
+                ExecCRUD(query, "Thêm thành công Mặt hàng: " +txtTenHang.Text);
+                Query(queryTable);
+                ResetValues();
+
+                btnThem.Enabled = true;
+                btnSua.Enabled = true;
+                btnBoQua.Enabled = false;
+                txtMaHang.Enabled = false;
+            }
+
+           /* btnSua.Enabled = false;
             btnBoQua.Enabled = true;
-            btnLuu.Enabled = true;
             btnThem.Enabled = false;
             ResetValues();
             txtMaHang.Enabled = true;
             txtMaHang.Focus();
             txtSoLuong.Enabled = true;
             txtDonGiaNhap.Enabled = true;
-            txtDonGiaBan.Enabled = true;
+            txtDonGiaBan.Enabled = true;*/
         }
 
-        private void btnLuu_Click(object sender, EventArgs e)
+        private bool CheckValidation()
         {
-            string sql;
-            if (txtMaHang.Text.Trim().Length == 0)
-            {
-                MessageBox.Show("Bạn phải nhập mã hàng", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                txtMaHang.Focus();
-                return;
-            }
             if (txtTenHang.Text.Trim().Length == 0)
             {
                 MessageBox.Show("Bạn phải nhập tên hàng", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 txtTenHang.Focus();
-                return;
+                return false;
             }
-            
+
             if (txtAnh.Text.Trim().Length == 0)
             {
                 MessageBox.Show("Bạn phải chọn ảnh minh hoạ cho hàng", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 btnOpen.Focus();
-                return;
-            }
-            sql = "SELECT MaHang FROM tblHang WHERE MaHang=N'" + txtMaHang.Text.Trim() + "'";
-            if (Functions.CheckKey(sql))
-            {
-                MessageBox.Show("Mã hàng này đã tồn tại, bạn phải chọn mã hàng khác", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                txtMaHang.Focus();
-                return;
-            }
-            sql = "INSERT INTO tblHang(MaHang,TenHang,SoLuong,DonGiaNhap,DonGiaBan,Anh,Ghichu) VALUES(N'"
-                + txtMaHang.Text.Trim() + "',N'" + txtTenHang.Text.Trim() +
-          
-                "'," + txtSoLuong.Text.Trim() + "," + txtDonGiaNhap.Text +
-                "," + txtDonGiaBan.Text + ",'" + txtAnh.Text + "',N'" + txtGhichu.Text.Trim() + "')";
+                return false;
 
-            Functions.RunSQL(sql);
-            LoadDataGridView();
-            ResetValues();
-            btnXoa.Enabled = true;
-            btnThem.Enabled = true;
-            btnSua.Enabled = true;
-            btnBoQua.Enabled = false;
-            btnLuu.Enabled = false;
-            txtMaHang.Enabled = false;
+            }
+            return true;
+
+        }
+
+        private void btnLuu_Click(object sender, EventArgs e)
+        {
+            
+           
         }
 
         private void btnSua_Click(object sender, EventArgs e)
         {
-            string sql;
-            if (tblH.Rows.Count == 0)
+           
+           if (CheckValidation())
             {
-                MessageBox.Show("Không còn dữ liệu", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
+                string query = "UPDATE hanghoa SET tenhh=N'" + txtTenHang.Text.Trim() +
+                "', gianhap=" + float.Parse(txtDonGiaNhap.Text) +
+                ", giaban=" + float.Parse(txtDonGiaBan.Text) +
+                ", SoLuong=" + int.Parse(txtSoLuong.Text) +
+                ", ghichu=N'" + txtGhiChu.Text +
+                "', hinhanh='" + txtAnh.Text +
+                "' WHERE mahh=N'" + txtMaHang.Text + "'";
+
+                ExecCRUD(query,"Sửa thành công Mặt hàng: "+ txtTenHang.Text);
+                Query(queryTable);
+                ResetValues();
+                btnBoQua.Enabled = false;
             }
-            if (txtMaHang.Text == "")
-            {
-                MessageBox.Show("Bạn chưa chọn bản ghi nào", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                txtMaHang.Focus();
-                return;
-            }
-            if (txtTenHang.Text.Trim().Length == 0)
-            {
-                MessageBox.Show("Bạn phải nhập tên hàng", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                txtTenHang.Focus();
-                return;
-            }
-            
-            if (txtAnh.Text.Trim().Length == 0)
-            {
-                MessageBox.Show("Bạn phải ảnh minh hoạ cho hàng", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                txtAnh.Focus();
-                return;
-            }
-            sql = "UPDATE tblHang SET TenHang=N'" + txtTenHang.Text.Trim().ToString() +
-               
-                "',SoLuong=" + txtSoLuong.Text +
-                ",Anh='" + txtAnh.Text + "',Ghichu=N'" + txtGhichu.Text + "' WHERE MaHang=N'" + txtMaHang.Text + "'";
-            Functions.RunSQL(sql);
-            LoadDataGridView();
-            ResetValues();
-            btnBoQua.Enabled = false;
         }
 
         private void btnXoa_Click(object sender, EventArgs e)
         {
 
             string sql;
-            if (tblH.Rows.Count == 0)
-            {
-                MessageBox.Show("Không còn dữ liệu!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
+          
             if (txtMaHang.Text == "")
             {
                 MessageBox.Show("Bạn chưa chọn bản ghi nào", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -232,7 +193,6 @@ namespace quanlybanhang1
             {
                 sql = "DELETE tblHang WHERE MaHang=N'" + txtMaHang.Text + "'";
                 Functions.RunSqlDel(sql);
-                LoadDataGridView();
                 ResetValues();
             }
         }
@@ -290,9 +250,72 @@ namespace quanlybanhang1
 
         }
 
-        private void frmDMHang_Load_1(object sender, EventArgs e)
+        private void dgvHang_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
         {
-            LoadDataGridView();
+            try
+            {
+
+                DialogResult res = MessageBox.Show("Bạn có chắc muốn xóa?", "Thông báo", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (res == DialogResult.Yes)
+                {
+                    string query = "UPDATE hanghoa SET isRemove = 1 WHERE mahh ='" + txtMaHang.Text + "'";
+                    ExecCRUD(query, "Xóa thành công Khách hàng: " + txtTenHang.Text);
+                    Query(queryTable);
+                }
+            }
+            catch (Exception es)
+            {
+                MessageBox.Show(es.Message);
+
+            }
+        }
+
+        private void dgvHang_RowEnter(object sender, DataGridViewCellEventArgs e)
+        {
+            int row = e.RowIndex;
+            txtMaHang.Text = dt.Rows[row][0].ToString();
+            txtTenHang.Text = dt.Rows[row][1].ToString();
+            txtDonGiaNhap.Text = dt.Rows[row][2].ToString();
+            txtDonGiaBan.Text = dt.Rows[row][3].ToString();
+            txtSoLuong.Text = dt.Rows[row][4].ToString();
+            txtGhiChu.Text = dt.Rows[row][5].ToString();
+            txtAnh.Text = dt.Rows[row][6].ToString();
+            picAnh.ImageLocation = txtAnh.Text;
+            btnBoQua.Enabled = true;
+            btnThem.Enabled = false;
+            btnSua.Enabled = true;
+
+        }
+
+        private void txtSoLuong_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!(e.KeyChar >= '0' && e.KeyChar <= '9' || e.KeyChar == (char)8))
+                e.Handled = true;
+        }
+
+        private void txtDonGiaBan_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!(e.KeyChar >= '0' && e.KeyChar <= '9' || e.KeyChar == (char)8))
+                e.Handled = true;
+        }
+
+        private void txtDonGiaNhap_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!(e.KeyChar >= '0' && e.KeyChar <= '9' || e.KeyChar == (char)8))
+                e.Handled = true;
+        }
+
+        private void btnBoQua_Click(object sender, EventArgs e)
+        {
+            ResetValues();
+            btnThem.Enabled = true;
+            btnSua.Enabled = false;
+        }
+
+        private void txtSearch_TextChanged(object sender, EventArgs e)
+        {
+            (dgvHang.DataSource as DataTable).DefaultView.RowFilter = string.Format("tenhh LIKE '%{0}%'", txtSearch.Text);
+
         }
     }
 }
