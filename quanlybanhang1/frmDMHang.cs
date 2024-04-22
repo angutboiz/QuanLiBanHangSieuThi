@@ -21,7 +21,8 @@ namespace quanlybanhang1
         SqlCommand cmd;
         string connectionString = @"Data Source=DESKTOP-8T8L9ET;Initial Catalog=QLBanHangSieuThi;Trusted_Connection=True";
 
-        string queryTable = "select mahh,tenhh,gianhap,giaban,soluong,ghichu,hinhanh from hanghoa where isRemove = 0";
+        string queryTable = @"select mahh,tenhh,tenlh,gianhap,giaban,soluong,ghichu,hinhanh from hanghoa 
+                            INNER JOIN loaihang ON hanghoa.malh = loaihang.malh where isRemove = 0";
         public frmDMHang()
         {
             InitializeComponent();
@@ -32,9 +33,11 @@ namespace quanlybanhang1
             if (Functions.DatabaseExists())
             {
                 txtMaHang.Enabled = false;
-                btnBoQua.Enabled = false;
+             
 
                 Query(queryTable);
+                string queryComboBox = "select malh,tenlh from loaihang";
+                FillDataComboBox(queryComboBox, "tenlh", cbLoaiHang);
             }
             else
             {
@@ -51,12 +54,38 @@ namespace quanlybanhang1
             txtSoLuong.Text = "0";
             txtDonGiaNhap.Text = "0";
             txtDonGiaBan.Text = "0";
+
             
             txtGhiChu.Text = "";
             picAnh.Image = null;
             txtAnh.Text = "";
         }
 
+        private void FillDataComboBox(string query, string name, ComboBox cb)
+        {
+            cb.Items.Clear();
+            try
+            {
+                cnn = new SqlConnection(connectionString);
+                cnn.Open();
+
+
+                SqlCommand sqlCmd = new SqlCommand(query, cnn);
+                SqlDataReader sqlReader = sqlCmd.ExecuteReader();
+
+
+
+                while (sqlReader.Read())
+                {
+                    cb.Items.Add(sqlReader[name].ToString());
+                }
+                cnn.Close();
+            }
+            catch (Exception es)
+            {
+                MessageBox.Show(es.Message);
+            }
+        }
 
         private void Query(string query)
         {
@@ -108,7 +137,7 @@ namespace quanlybanhang1
         {
             if (CheckValidation())
             {
-                string query = "INSERT INTO hanghoa (tenhh,gianhap,giaban,soluong,ghichu,hinhanh) VALUES(N'" + txtTenHang.Text +
+                string query = "INSERT INTO hanghoa (malh,tenhh,gianhap,giaban,soluong,ghichu,hinhanh) VALUES('" + txbMaLH.Text +"',N'" + txtTenHang.Text +
                     "'," + float.Parse(txtDonGiaNhap.Text) + "," + float.Parse(txtDonGiaBan.Text) +
                     "," + int.Parse(txtSoLuong.Text) + ",'" + txtGhiChu.Text + "',N'" + txtAnh.Text.Trim() + "')";
 
@@ -116,21 +145,10 @@ namespace quanlybanhang1
                 Query(queryTable);
                 ResetValues();
 
-                btnThem.Enabled = true;
-                btnSua.Enabled = true;
-                btnBoQua.Enabled = false;
-                txtMaHang.Enabled = false;
+                
             }
 
-           /* btnSua.Enabled = false;
-            btnBoQua.Enabled = true;
-            btnThem.Enabled = false;
-            ResetValues();
-            txtMaHang.Enabled = true;
-            txtMaHang.Focus();
-            txtSoLuong.Enabled = true;
-            txtDonGiaNhap.Enabled = true;
-            txtDonGiaBan.Enabled = true;*/
+           
         }
 
         private bool CheckValidation()
@@ -142,21 +160,38 @@ namespace quanlybanhang1
                 return false;
             }
 
-            if (txtAnh.Text.Trim().Length == 0)
+            if (txtDonGiaBan.Text.Trim().Length == 0)
             {
-                MessageBox.Show("Bạn phải chọn ảnh minh hoạ cho hàng", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                btnOpen.Focus();
+                MessageBox.Show("Bạn phải nhập đơn giá bán", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                txtDonGiaBan.Focus();
+                return false;
+
+            }
+
+            if (txtDonGiaNhap.Text.Trim().Length == 0)
+            {
+                MessageBox.Show("Bạn phải nhập đơn giá nhập", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                txtDonGiaNhap.Focus();
+                return false;
+
+            }
+
+            if (txtSoLuong.Text.Trim().Length == 0)
+            {
+                MessageBox.Show("Bạn phải nhập số lượng", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                txtSoLuong.Focus();
+                return false;
+
+            }
+
+            if (cbLoaiHang.Text.Trim().Length == 0)
+            {
+                MessageBox.Show("Bạn phải chọn loại hàng trước khi thêm sản phẩm", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return false;
 
             }
             return true;
 
-        }
-
-        private void btnLuu_Click(object sender, EventArgs e)
-        {
-            
-           
         }
 
         private void btnSua_Click(object sender, EventArgs e)
@@ -175,7 +210,6 @@ namespace quanlybanhang1
                 ExecCRUD(query,"Sửa thành công Mặt hàng: "+ txtTenHang.Text);
                 Query(queryTable);
                 ResetValues();
-                btnBoQua.Enabled = false;
             }
         }
 
@@ -209,36 +243,6 @@ namespace quanlybanhang1
                 txtAnh.Text = dlgOpen.FileName;
             }
         }
-
-        private void btnTimKiem_Click(object sender, EventArgs e)
-        {
-            string sql;
-            string maHang = txtMaHang.Text.Trim();  // Lấy mã hàng từ textbox
-            string tenHang = txtTenHang.Text.Trim();  // Lấy tên hàng từ textbox
-
-            // Xây dựng câu truy vấn SQL dựa trên mã hàng và tên hàng
-            sql = "SELECT * FROM tblHang WHERE 1=1";
-            if (maHang != "")
-                sql += " AND MaHang LIKE '%" + maHang + "%'";
-            if (tenHang != "")
-                sql += " AND TenHang LIKE N'%" + tenHang + "%'";
-
-            // Gọi phương thức GetDataToTable từ class Functions để thực hiện truy vấn
-            DataTable dt = Functions.GetDataToTable(sql);
-            // Gán dữ liệu vào DataGridView
-            dgvHang.DataSource = dt;
-            // Kiểm tra nếu không tìm thấy dữ liệu
-            if (dt.Rows.Count == 0)
-            {
-                MessageBox.Show("Không tìm thấy hàng hóa!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            else
-            {
-                MessageBox.Show("Có " + dt.Rows.Count + " hàng hóa được tìm thấy!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-        }
-
-     
 
         private void btnDong_Click(object sender, EventArgs e)
         {
@@ -275,15 +279,14 @@ namespace quanlybanhang1
             int row = e.RowIndex;
             txtMaHang.Text = dt.Rows[row][0].ToString();
             txtTenHang.Text = dt.Rows[row][1].ToString();
-            txtDonGiaNhap.Text = dt.Rows[row][2].ToString();
-            txtDonGiaBan.Text = dt.Rows[row][3].ToString();
-            txtSoLuong.Text = dt.Rows[row][4].ToString();
-            txtGhiChu.Text = dt.Rows[row][5].ToString();
-            txtAnh.Text = dt.Rows[row][6].ToString();
+            cbLoaiHang.Text = dt.Rows[row][2].ToString();
+            txtDonGiaNhap.Text = dt.Rows[row][3].ToString();
+            txtDonGiaBan.Text = dt.Rows[row][4].ToString();
+            txtSoLuong.Text = dt.Rows[row][5].ToString();
+            txtGhiChu.Text = dt.Rows[row][6].ToString();
+            txtAnh.Text = dt.Rows[row][7].ToString();
             picAnh.ImageLocation = txtAnh.Text;
-            btnBoQua.Enabled = true;
-            btnThem.Enabled = false;
-            btnSua.Enabled = true;
+            
 
         }
 
@@ -305,17 +308,79 @@ namespace quanlybanhang1
                 e.Handled = true;
         }
 
-        private void btnBoQua_Click(object sender, EventArgs e)
-        {
-            ResetValues();
-            btnThem.Enabled = true;
-            btnSua.Enabled = false;
-        }
-
         private void txtSearch_TextChanged(object sender, EventArgs e)
         {
             (dgvHang.DataSource as DataTable).DefaultView.RowFilter = string.Format("tenhh LIKE '%{0}%'", txtSearch.Text);
 
+        }
+
+        private void cbLoaiHang_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string queryName = "select malh,tenlh from loaihang where tenlh like N'%" + cbLoaiHang.Text + "%'";
+            try
+            {
+                cnn = new SqlConnection(connectionString);
+                cnn.Open();
+
+                cmd = new SqlCommand(queryName, cnn);
+
+                cmd.Parameters.AddWithValue("@tenlh", cbLoaiHang.SelectedItem.ToString());
+
+                object result = cmd.ExecuteScalar();
+                if (result != null)
+                {
+                    txbMaLH.Text = result.ToString();
+                }
+
+                cnn.Close();
+
+            }
+            catch (Exception es)
+            {
+                MessageBox.Show(es.ToString());
+
+            }
+        }
+
+        private void btnFormLoaiHang_Click(object sender, EventArgs e)
+        {
+            frmLoaiHang f = new frmLoaiHang();
+            f.ShowDialog();
+        }
+
+        private void cbLoaiHang_Click(object sender, EventArgs e)
+        {
+            string queryComboBox = "select malh,tenlh from loaihang";
+            FillDataComboBox(queryComboBox, "tenlh", cbLoaiHang);
+        }
+
+        private void dgvHang_RowPrePaint(object sender, DataGridViewRowPrePaintEventArgs e)
+        {
+            DataGridViewRow row = dgvHang.Rows[e.RowIndex];
+            int soLuong = Convert.ToInt32(row.Cells["soluong"].Value);
+
+            Color red = ColorTranslator.FromHtml("#fecaca");
+            Color yellow = ColorTranslator.FromHtml("#fde68a");
+
+
+            if (soLuong <= 1)
+            {
+                row.DefaultCellStyle.BackColor = red;
+            }
+            else if (soLuong <= 10)
+            {
+                row.DefaultCellStyle.BackColor = yellow;
+
+            }
+            else
+            {
+                row.DefaultCellStyle.BackColor = Color.White;
+            }
+        }
+
+        private void btnClear_Click(object sender, EventArgs e)
+        {
+            ResetValues();
         }
     }
 }

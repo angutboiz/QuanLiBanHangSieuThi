@@ -31,10 +31,11 @@ namespace quanlybanhang1
 
         private void frmDMKhachHang_Load(object sender, EventArgs e)
         {
+            ResetValues();
             if (Functions.DatabaseExists())
             {
                 txtMaKhach.Enabled = false;
-                btnBoQua.Enabled = false;
+               
 
                 Query(queryTable);
             }
@@ -113,17 +114,11 @@ namespace quanlybanhang1
                 return false;
 
             }
-            if (txtDiaChi.Text.Trim().Length == 0)
-            {
-                MessageBox.Show("Bạn phải nhập địa chỉ", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                txtDiaChi.Focus();
-                return false;
-
-            }
-            if (mtbDienThoai.Text == "(  )    -")
+           
+            if (txbDienThoai.Text == "(  )    -")
             {
                 MessageBox.Show("Bạn phải nhập điện thoại", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                mtbDienThoai.Focus();
+                txbDienThoai.Focus();
                 return false;
 
             }
@@ -150,13 +145,11 @@ namespace quanlybanhang1
             if (CheckValidation())
             {
 
-                string query = "INSERT INTO khachhang (tenkh,sdt,diachi) VALUES (N'" + txtTenKhach.Text.Trim() + "','" + mtbDienThoai.Text + "',N'" + txtDiaChi.Text.Trim() + "')";
+                string query = "INSERT INTO khachhang (tenkh,sdt,diachi) VALUES (N'" + txtTenKhach.Text.Trim() + "','" + txbDienThoai.Text + "',N'" + txtDiaChi.Text.Trim() + "')";
 
                 ExecCRUD(query, "Thêm thành công nhân viên: " + txtTenKhach.Text);
                 Query(queryTable);
-                btnSua.Enabled = false;
-                btnBoQua.Enabled = true;
-                btnThem.Enabled = false;
+                
                 ResetValues();
             }
         }
@@ -167,7 +160,7 @@ namespace quanlybanhang1
             txtMaKhach.Text = "";
             txtTenKhach.Text = "";
             txtDiaChi.Text = "";
-            mtbDienThoai.Text = "";
+            txbDienThoai.Text = "";
         }
        
         private void btnLuu_Click(object sender, EventArgs e)
@@ -186,10 +179,7 @@ namespace quanlybanhang1
 
             ResetValues();
 
-            btnThem.Enabled = true;
-            btnSua.Enabled = true;
-            btnBoQua.Enabled = false;
-            txtMaKhach.Enabled = false;
+            
         }
 
         private void btnSua_Click(object sender, EventArgs e)
@@ -197,22 +187,19 @@ namespace quanlybanhang1
             if (CheckValidation())
             {
                 string query = "UPDATE khachhang SET tenkh=N'" + txtTenKhach.Text.Trim().ToString() + "',DiaChi=N'" +
-                    txtDiaChi.Text.Trim().ToString() + "',sdt='" + mtbDienThoai.Text.ToString() +
+                    txtDiaChi.Text.Trim().ToString() + "',sdt='" + txbDienThoai.Text.ToString() +
                     "' WHERE makh=N'" + txtMaKhach.Text + "'";
                 ExecCRUD(query,"Sửa thành công khách hàng: "+txtTenKhach.Text);
                 Query(queryTable);
                 ResetValues();
-                btnBoQua.Enabled = false;
+                
             }
         }
 
         private void btnBoQua_Click(object sender, EventArgs e)
         {
             ResetValues();
-            btnBoQua.Enabled = false;
-            btnThem.Enabled = true;
-            btnSua.Enabled = true;
-            txtMaKhach.Enabled = false;
+            
         }
 
         private void btnDong_Click(object sender, EventArgs e)
@@ -250,9 +237,8 @@ namespace quanlybanhang1
             txtMaKhach.Text = dt.Rows[row][0].ToString();
             txtTenKhach.Text = dt.Rows[row][1].ToString();
             txtDiaChi.Text = dt.Rows[row][2].ToString();
-            mtbDienThoai.Text = dt.Rows[row][3].ToString();
-            btnBoQua.Enabled = true;
-            btnThem.Enabled = false;
+            txbDienThoai.Text = dt.Rows[row][3].ToString();
+            
         }
 
         private void txtSearch_TextChanged(object sender, EventArgs e)
@@ -279,6 +265,17 @@ namespace quanlybanhang1
                 MessageBox.Show(es.Message);
 
             }
+        }
+
+        private void txbDienThoai_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!(e.KeyChar >= '0' && e.KeyChar <= '9' || e.KeyChar == (char)8))
+                e.Handled = true;
+        }
+
+        private void btnClear_Click(object sender, EventArgs e)
+        {
+            ResetValues();
         }
     }
 }

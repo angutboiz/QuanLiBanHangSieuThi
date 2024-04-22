@@ -32,10 +32,10 @@ namespace quanlybanhang1
 
         private void frmDMNhanvien_Load(object sender, EventArgs e)
         {
+            ResetValues();
             if (Functions.DatabaseExists())
             {
                 txtMaNhanVien.Enabled = false;
-                btnBoQua.Enabled = false;
                 cbSex.SelectedIndex = 0;
                 Query(queryTable);
             }
@@ -109,13 +109,11 @@ namespace quanlybanhang1
                 else
                 {
                     string query = "INSERT INTO NHANVIEN (TenNV,GioiTinh,SDT,NgaySinh,DiaChi,Username,Password) VALUES (N'"
-                    +txtTenNhanVien.Text+"',N'"+cbSex.Text+"','"+mtbDienThoai.Text+"','"+dtpNgaySinh.Value.ToString("yyyy-MM-dd")+"',N'"+txtDiaChi.Text+"','"+txtUser.Text+"','"+txtPass.Text+"')";
+                    +txtTenNhanVien.Text+"',N'"+cbSex.Text+"','"+txbDienThoai.Text+"','"+dtpNgaySinh.Value.ToString("yyyy-MM-dd")+"',N'"+txtDiaChi.Text+"','"+txtUser.Text+"','"+txtPass.Text+"')";
             
                     ExecCRUD(query,"Thêm thành công nhân viên: "+txtTenNhanVien.Text);
                     Query(queryTable);
-                    btnSua.Enabled = false;
-                    btnBoQua.Enabled = true;
-                    btnThem.Enabled = false;
+                    
                     ResetValues();
                     txtMaNhanVien.Enabled = false;
                     txtMaNhanVien.Focus();
@@ -130,7 +128,7 @@ namespace quanlybanhang1
             cbSex.SelectedItem = 0;
             txtDiaChi.Text = "";
             dtpNgaySinh.Value = DateTime.Now;
-            mtbDienThoai.Text = "";
+            txbDienThoai.Text = "";
             txtUser.Text = "";
             txtPass.Text = "";
             btnSua.Text = "Sửa NV: ";
@@ -152,10 +150,10 @@ namespace quanlybanhang1
                 txtDiaChi.Focus();
                 return false;
             }*/
-            if (mtbDienThoai.Text == "(   )     -")
+            if (txbDienThoai.Text == "")
             {
                 MessageBox.Show("Bạn phải nhập điện thoại", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                mtbDienThoai.Focus();
+                txbDienThoai.Focus();
                 return false;
             }
 
@@ -204,7 +202,7 @@ namespace quanlybanhang1
             {
                 string query = "UPDATE nhanvien SET  TenNV=N'" + txtTenNhanVien.Text.Trim().ToString() +
                         "',DiaChi=N'" + txtDiaChi.Text.Trim().ToString() +
-                        "',SDT='" + mtbDienThoai.Text.ToString() + "',GioiTinh=N'" + cbSex.Text.Trim() +
+                        "',SDT='" + txbDienThoai.Text.ToString() + "',GioiTinh=N'" + cbSex.Text.Trim() +
                         "',NgaySinh='" + dtpNgaySinh.Value.ToString("yyyy-MM-dd") +
                         "',Username='" + txtUser.Text +
                         "',Password='" + txtPass.Text +
@@ -214,17 +212,13 @@ namespace quanlybanhang1
                 ExecCRUD(query,"Cập nhật thành công NV: "+ txtTenNhanVien.Text);
                 Query(queryTable);
                 ResetValues();
-                btnBoQua.Enabled = false;
             }
         }
 
         private void btnBoQua_Click(object sender, EventArgs e)
         {
             ResetValues();
-            btnBoQua.Enabled = false;
-            btnThem.Enabled = true;
-            btnSua.Enabled = false;
-            txtMaNhanVien.Enabled = false;
+           
         }
 
         private void txtMaNhanVien_KeyUp(object sender, KeyEventArgs e)
@@ -280,15 +274,13 @@ namespace quanlybanhang1
             txtMaNhanVien.Text = dt.Rows[row][0].ToString();
             txtTenNhanVien.Text = dt.Rows[row][1].ToString();
             cbSex.Text = dt.Rows[row][2].ToString();
-            mtbDienThoai.Text = dt.Rows[row][3].ToString();
+            txbDienThoai.Text = dt.Rows[row][3].ToString();
             dtpNgaySinh.Text = dt.Rows[row][4].ToString();
             txtDiaChi.Text = dt.Rows[row][5].ToString();
             txtUser.Text = dt.Rows[row][6].ToString();
             txtPass.Text = dt.Rows[row][7].ToString();
 
-            btnSua.Enabled = true;
-            btnThem.Enabled = false;
-            btnBoQua.Enabled = true;
+          
             btnSua.Text = "Sửa NV: " +txtTenNhanVien.Text;
 
         }
@@ -317,6 +309,12 @@ namespace quanlybanhang1
                 MessageBox.Show(es.Message);
 
             }
+        }
+
+        private void txbDienThoai_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!(e.KeyChar >= '0' && e.KeyChar <= '9' || e.KeyChar == (char)8))
+                e.Handled = true;
         }
     }
 }

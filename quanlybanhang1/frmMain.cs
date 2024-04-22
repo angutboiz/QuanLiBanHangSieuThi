@@ -58,6 +58,12 @@ namespace quanlybanhang1
             frmHoaDonBan dMHoaDonBan = new frmHoaDonBan();
             dMHoaDonBan.ShowDialog();
         }
+
+        private void btnBaoCao_Click(object sender, EventArgs e)
+        {
+            frmBaoCao frmBaoCao = new frmBaoCao();
+            frmBaoCao.ShowDialog();
+        }
     }
     
 }
