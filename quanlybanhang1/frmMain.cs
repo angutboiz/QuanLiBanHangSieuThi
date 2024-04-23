@@ -14,6 +14,8 @@ namespace quanlybanhang1
 {
     public partial class frmMain : Form
     {
+        public string Role { get; set; }
+
         public frmMain()
         {
            
@@ -22,8 +24,15 @@ namespace quanlybanhang1
 
         private void frmMain_Load(object sender, EventArgs e)
         {
-            //Functions.Connect(); //Mở kết nối
-            
+            if (Role == "Nhân viên")
+            {
+                btnNhanVien.Enabled = false;
+            }
+            else if (Role == "Admin")
+            {
+                btnNhanVien.Enabled = true;
+            }
+
         }
 
         

@@ -62,6 +62,8 @@ namespace quanlybanhang1
         {
             if (Functions.DatabaseExists())
             {
+                dtpNgayBan.Value = DateTime.Now;
+
                 txtMaKhach.Enabled = false;
 
                 Query(queryTable);
@@ -278,6 +280,7 @@ namespace quanlybanhang1
                 }
                 CountAmount();
                 Query(queryTable);
+                dtpNgayBan.Value = DateTime.Now;
             }
         }
 

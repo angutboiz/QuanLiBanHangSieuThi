@@ -23,7 +23,7 @@ namespace quanlybanhang1
         SqlCommand cmd;
         string connectionString = @"Data Source=DESKTOP-8T8L9ET;Initial Catalog=QLBanHangSieuThi;Trusted_Connection=True";
 
-        string queryTable = "select manv,tennv,gioitinh,sdt,ngaysinh,diachi,username,password from nhanvien where isremove = 0";
+        string queryTable = "select manv,tennv,gioitinh,sdt,ngaysinh,diachi,username,password,role from nhanvien where isremove = 0 and role != 'admin'";
 
         public frmDMNhanvien()
         {
@@ -108,8 +108,8 @@ namespace quanlybanhang1
                 }
                 else
                 {
-                    string query = "INSERT INTO NHANVIEN (TenNV,GioiTinh,SDT,NgaySinh,DiaChi,Username,Password) VALUES (N'"
-                    +txtTenNhanVien.Text+"',N'"+cbSex.Text+"','"+txbDienThoai.Text+"','"+dtpNgaySinh.Value.ToString("yyyy-MM-dd")+"',N'"+txtDiaChi.Text+"','"+txtUser.Text+"','"+txtPass.Text+"')";
+                    string query = "INSERT INTO NHANVIEN (TenNV,GioiTinh,SDT,NgaySinh,DiaChi,Username,Password,role) VALUES (N'"
+                    +txtTenNhanVien.Text+"',N'"+cbSex.Text+"','"+txbDienThoai.Text+"','"+dtpNgaySinh.Value.ToString("yyyy-MM-dd")+"',N'"+txtDiaChi.Text+"','"+txtUser.Text+"','"+txtPass.Text+"','"+cbRole.Text+"')";
             
                     ExecCRUD(query,"Thêm thành công nhân viên: "+txtTenNhanVien.Text);
                     Query(queryTable);
@@ -132,7 +132,7 @@ namespace quanlybanhang1
             txtUser.Text = "";
             txtPass.Text = "";
             btnSua.Text = "Sửa NV: ";
-
+            cbRole.SelectedIndex = 0;
         }
 
         //kiểm tra các textbox có bỏ trống hay không?
@@ -206,6 +206,7 @@ namespace quanlybanhang1
                         "',NgaySinh='" + dtpNgaySinh.Value.ToString("yyyy-MM-dd") +
                         "',Username='" + txtUser.Text +
                         "',Password='" + txtPass.Text +
+                        "',Role='" + cbRole.Text +
                         "' WHERE MaNV=N'" + txtMaNhanVien.Text + "'";
                 //Functions.RunSQL(query);
                 //LoadDataGridView();
@@ -231,40 +232,6 @@ namespace quanlybanhang1
         {
             this.Close();
         }
-
-        private void btnTimKiem_Click(object sender, EventArgs e)
-        {
-            string sql;
-            string maNhanVien = txtMaNhanVien.Text.Trim();  // Lấy mã hàng từ textbox
-            string tenNhanVien = txtTenNhanVien.Text.Trim();  // Lấy tên hàng từ textbox
-
-            // Xây dựng câu truy vấn SQL dựa trên mã hàng và tên hàng
-            sql = "SELECT * FROM nhanvien WHERE 1=1";
-            if (maNhanVien != "")
-                sql += " AND manv LIKE '%" + maNhanVien + "%'";
-            if (tenNhanVien != "")
-                sql += " AND tennv LIKE N'%" + tenNhanVien + "%'";
-
-            // Gọi phương thức GetDataToTable từ class Functions để thực hiện truy vấn
-            DataTable dt = Functions.GetDataToTable(sql);
-            // Gán dữ liệu vào DataGridView
-            dgvNhanVien.DataSource = dt;
-            // Kiểm tra nếu không tìm thấy dữ liệu
-            if (dt.Rows.Count == 0)
-            {
-                MessageBox.Show("Không tìm thấy hàng hóa!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            else
-            {
-                MessageBox.Show("Có " + dt.Rows.Count + " hàng hóa được tìm thấy!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-        }
-
-        private void dtpNgaySinh_ValueChanged(object sender, EventArgs e)
-        {
-
-        }
-
         private void dgvNhanVien_RowEnter(object sender, DataGridViewCellEventArgs e)
         {
             //bấm vào các dòng trên bảng để fill data vô textbox
@@ -279,8 +246,9 @@ namespace quanlybanhang1
             txtDiaChi.Text = dt.Rows[row][5].ToString();
             txtUser.Text = dt.Rows[row][6].ToString();
             txtPass.Text = dt.Rows[row][7].ToString();
+            cbRole.Text = dt.Rows[row][8].ToString();
 
-          
+
             btnSua.Text = "Sửa NV: " +txtTenNhanVien.Text;
 
         }

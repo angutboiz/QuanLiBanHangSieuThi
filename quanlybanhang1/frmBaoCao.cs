@@ -22,16 +22,14 @@ namespace quanlybanhang1
         string connectionString = @"Data Source=DESKTOP-8T8L9ET;Initial Catalog=QLBanHangSieuThi;Trusted_Connection=True";
 
         string queryTable = @"SELECT
-                                KhachHang.TenKH,
-                                NhanVien.TenNV,
-                                HangHoa.TenHH,                                
-                                HangHoa.GiaNhap,
-                                HangHoa.GiaBan,                                
-
-
-                                HoaDon.NgayLap,
-                                HoaDon.SoLuong,
-                                HoaDon.TongTien                                
+                                KhachHang.TenKH as ""Tên khách hàng"",
+                                NhanVien.TenNV as ""Tên nhân viên"",
+                                HangHoa.TenHH as ""Tên hàng hóa"",                                
+                                FORMAT(HangHoa.GiaNhap, '#,##0') as ""Giá nhập"",
+                                FORMAT(HangHoa.GiaBan, '#,##0') as ""Giá bán"",                                
+                                HoaDon.NgayLap as ""Ngày lập"",
+                                HoaDon.SoLuong as ""Số lượng"",
+                                FORMAT(HoaDon.TongTien, '#,##0') as ""Tổng tiền""                                 
 
 
                             FROM 
@@ -53,7 +51,15 @@ namespace quanlybanhang1
         {
 
             Query(queryTable);
+            CountAmount();
+
         }
+
+        string RemoveDot(string number)
+        {
+            return number.Replace(",", "");
+        }
+
         private void CountAmount()
         {
             decimal chi = 0;
@@ -70,22 +76,22 @@ namespace quanlybanhang1
 
             foreach (DataGridViewRow row in dgvBaoCao.Rows)
             {
-                // Kiểm tra xem dòng đó có phải là dòng dữ liệu hợp lệ hay không
+                //Kiểm tra xem dòng đó có phải là dòng dữ liệu hợp lệ hay không
                 if (row.IsNewRow) continue;
-                tongtienRow = decimal.Parse(row.Cells["tongtien"].Value.ToString());
 
-                gianhap = decimal.Parse(row.Cells["gianhap"].Value.ToString());
-                giaban = decimal.Parse(row.Cells["giaban"].Value.ToString());
-                soluong = int.Parse(row.Cells["soluong"].Value.ToString());
+                tongtienRow = decimal.Parse(RemoveDot(row.Cells["Tổng tiền"].Value.ToString()));
+                gianhap = decimal.Parse(RemoveDot(row.Cells["Giá nhập"].Value.ToString()));
+                giaban = decimal.Parse(RemoveDot(row.Cells["Giá bán"].Value.ToString()));
+                soluong = int.Parse(RemoveDot(row.Cells["Số lượng"].Value.ToString()));
 
                 chi = (giaban - gianhap) * soluong;
-                loinhuan = tongtien - chi;
+                loinhuan = tongtienRow - chi;
 
                 tongchi += chi;
                 tongloinhuan += loinhuan;
                 tongtien += tongtienRow;
+                // MessageBox.Show("Giá nhập: " + gianhap + "\nGía bán: " + giaban + "\nSo luog: " + soluong +"\nTong tien: "+tongtienRow+ "\nChi: " + chi + "\nloi nhuan: " + loinhuan);
             }
-
 
 
 
@@ -96,7 +102,12 @@ namespace quanlybanhang1
 
             txbLoiNhuan.Text = string.Format("{0:#,##0}", tongloinhuan);
 
-            lbDoanhThu.Text = "Bằng chữ: " + Functions.ConvertMoneyToWords(tongtien);
+            if (tongtien > 0)
+            {
+                lbDoanhThu.Text = "Bằng chữ: " + Functions.ConvertMoneyToWords(tongtien);
+
+            }
+
         }
 
         private void Query(string query)
@@ -117,8 +128,7 @@ namespace quanlybanhang1
             }
             catch (Exception es)
             {
-                MessageBox.Show("Chưa có dữ liệu báo cáo!");
-
+                MessageBox.Show(es.ToString());
             }
         }
 
@@ -147,7 +157,234 @@ namespace quanlybanhang1
 
         private void dgvBaoCao_DataSourceChanged(object sender, EventArgs e)
         {
-            CountAmount();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            foreach (Control control in this.Controls)
+            {
+                if (control is RadioButton rb)
+                {
+                    rb.Checked = false;
+                }
+            }
+
+            Query(queryTable);
+        }
+
+        string yearmuch = "";
+        string yearless = "";
+        string monthmuch = "";
+        string monthless = "";
+        string nvmonth = "";
+        string nvyear = "";
+
+        private void rbYearMuch_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rbYearMuch.Checked)
+            {
+                string query = @"SELECT
+                                    YEAR(hoadon.NgayLap) AS ""Năm"",
+                                    SUM(hoadon.TongTien) AS ""Tổng tiền năm kiếm được nhiều nhất""
+
+                                FROM 
+                                    HoaDon
+                                INNER JOIN 
+                                    KhachHang ON HoaDon.MaKH = KhachHang.MaKH
+                                INNER JOIN 
+                                    NhanVien ON HoaDon.MaNV = NhanVien.MaNV
+                                INNER JOIN 
+                                    HangHoa ON HoaDon.MaHH = HangHoa.MaHH
+                                WHERE 
+                                    HoaDon.ThanhToan = 1 AND HoaDon.isRemove = 0
+                                GROUP BY 
+                                    YEAR(hoadon.NgayLap)
+                                ORDER BY 
+                                    ""Tổng tiền năm kiếm được nhiều nhất"" DESC";
+
+                Query(query);
+            } 
+
+        }
+
+        private void rbMonthMuch_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rbMonthMuch.Checked)
+            {
+                string query = @"SELECT
+                                    MONTH(hoadon.NgayLap) AS ""Tháng nhiều nhất"",
+                                    YEAR(hoadon.NgayLap) AS ""Năm"",
+                                    SUM(hoadon.TongTien) AS ""Tổng tiền tháng kiếm được""
+
+                                FROM 
+                                    HoaDon
+                                INNER JOIN 
+                                    KhachHang ON HoaDon.MaKH = KhachHang.MaKH
+                                INNER JOIN 
+                                    NhanVien ON HoaDon.MaNV = NhanVien.MaNV
+                                INNER JOIN 
+                                    HangHoa ON HoaDon.MaHH = HangHoa.MaHH
+                                WHERE 
+                                    HoaDon.ThanhToan = 1 AND HoaDon.isRemove = 0
+                                GROUP BY 
+                                    MONTH(hoadon.NgayLap),Year(hoadon.NgayLap)
+                                ORDER BY 
+                                    ""Tổng tiền tháng kiếm được"" DESC";
+
+                Query(query);
+            }
+           
+
+
+        }
+
+        private void rbNVMuch_CheckedChanged(object sender, EventArgs e)
+        {
+            string query;
+            if (rbYearMuch.Checked)
+            {
+                query = @"SELECT
+                                    MONTH(hoadon.NgayLap) AS ""Tháng nhiều nhất"",
+                                    SUM(hoadon.TongTien) AS ""Tổng tiền tháng kiếm được""
+
+                                FROM 
+                                    HoaDon
+                                INNER JOIN 
+                                    KhachHang ON HoaDon.MaKH = KhachHang.MaKH
+                                INNER JOIN 
+                                    NhanVien ON HoaDon.MaNV = NhanVien.MaNV
+                                INNER JOIN 
+                                    HangHoa ON HoaDon.MaHH = HangHoa.MaHH
+                                WHERE 
+                                    HoaDon.ThanhToan = 1 AND HoaDon.isRemove = 0
+                                GROUP BY 
+                                    MONTH(hoadon.NgayLap)
+                                ORDER BY 
+                                    ""Tổng tiền tháng kiếm được"" DESC";
+
+            }
+            else
+            {
+                query = "select * from hoadon";
+            }
+
+            Query(query);
+
+        }
+
+        private void rbNVThang_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rbNVThang.Checked)
+            {
+                string query = @"SELECT 
+                                    NhanVien.TenNV AS ""Tên nhân viên"",
+                                    Month(HoaDon.NgayLap) AS Tháng,                                    
+                                    YEAR(HoaDon.NgayLap) AS Năm,
+
+                                    SUM(HoaDon.SoLuong) AS ""Tổng số lượng bán được trong tháng""
+
+                                FROM 
+                                    HoaDon
+                                INNER JOIN 
+                                    NhanVien ON HoaDon.MaNV = NhanVien.MaNV
+
+                                WHERE 
+                                    HoaDon.ThanhToan = 1 AND HoaDon.isRemove = 0
+
+                                GROUP BY 
+                                    NhanVien.TenNV, month(HoaDon.NgayLap), YEAR(HoaDon.NgayLap)
+
+                                ORDER BY 
+                                    ""Tổng số lượng bán được trong tháng"" DESC";
+
+                Query(query);
+            }
+        }
+
+        private void rbNVYear_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rbNVYear.Checked)
+            {
+                string query = @"SELECT 
+                                    NhanVien.TenNV AS ""Tên nhân viên"",
+                                    YEAR(HoaDon.NgayLap) AS Năm,
+                                    SUM(HoaDon.SoLuong) AS ""Tổng số lượng bán được trong năm""
+
+                                FROM 
+                                    HoaDon
+                                INNER JOIN 
+                                    NhanVien ON HoaDon.MaNV = NhanVien.MaNV
+
+                                WHERE 
+                                    HoaDon.ThanhToan = 1 AND HoaDon.isRemove = 0
+
+                                GROUP BY 
+                                    NhanVien.TenNV, YEAR(HoaDon.NgayLap)
+
+                                ORDER BY 
+                                    ""Tổng số lượng bán được trong năm"" DESC";
+
+                Query(query);
+            }
+        }
+
+        private void rbSPBanChay_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void rbSPBanChayMonth_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rbSPBanChayMonth.Checked)
+            {
+                string query = @"SELECT 
+                                    HangHoa.TenHH AS ""Tên sản phẩm"",
+                                    MONTH(HoaDon.NgayLap) AS ""Tháng"",
+                                    SUM(HoaDon.SoLuong) AS ""Tổng số lượng bán chạy""
+
+                                FROM 
+                                    HoaDon
+                                INNER JOIN 
+                                    HangHoa ON HoaDon.MaHH = HangHoa.MaHH
+
+                                WHERE 
+                                    HoaDon.ThanhToan = 1 AND HoaDon.isRemove = 0
+
+                                GROUP BY 
+                                    HangHoa.TenHH, MONTH(HoaDon.NgayLap)
+
+                                ORDER BY 
+                                     ""Tổng số lượng bán chạy"" DESC";
+
+                Query(query);
+            }
+        }
+
+        private void rbSPBanChayYear_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rbSPBanChayYear.Checked)
+            {
+                string query = @"SELECT 
+                                    HangHoa.TenHH AS ""Tên sản phẩm"",
+                                    YEAR(HoaDon.NgayLap) AS ""Năm"",
+                                    SUM(HoaDon.SoLuong) AS ""Tổng số lượng bán""
+
+                                FROM 
+                                    HoaDon
+                                INNER JOIN 
+                                    HangHoa ON HoaDon.MaHH = HangHoa.MaHH
+
+                                WHERE 
+                                    HoaDon.ThanhToan = 1 AND HoaDon.isRemove = 0
+
+                                GROUP BY 
+                                    HangHoa.TenHH, YEAR(HoaDon.NgayLap)
+
+                                ORDER BY 
+                                     ""Tổng số lượng bán"" DESC";
+
+                Query(query);
+            }
         }
     }
 }

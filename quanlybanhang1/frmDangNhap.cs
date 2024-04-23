@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -13,7 +16,13 @@ namespace quanlybanhang1
 {
     public partial class frmDangNhap : Form
     {
-        DataTable tblDn;
+        SqlConnection cnn;
+        SqlDataAdapter da;
+        DataTable dt;
+        SqlDataReader dr;
+        SqlCommand cmd;
+        string connectionString = @"Data Source=DESKTOP-8T8L9ET;Initial Catalog=QLBanHangSieuThi;Trusted_Connection=True";
+
         public frmDangNhap()
         {
             InitializeComponent();
@@ -36,43 +45,51 @@ namespace quanlybanhang1
 
         private void btnLogin_Click(object sender, EventArgs e)
         {
-            // Khởi tạo kết nối đến CSDL
-           // Functions.Connect();
+            frmMain frm = new frmMain();
 
-            // Lấy dữ liệu từ các textbox
             string username = txtusername.Text.Trim();
             string password = txtpassword.Text.Trim();
 
-            // Kiểm tra username và password không được để trống
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
             {
                 MessageBox.Show("Vui lòng nhập tên đăng nhập và mật khẩu.");
                 return;
+            } 
+            else {
+
+                string query = $"SELECT role FROM nhanvien WHERE Username = '{username}' AND Password = '{password}'";
+
+                try
+                {
+                    cnn = new SqlConnection(connectionString);
+                    cnn.Open();
+
+                    da = new SqlDataAdapter(query, cnn);
+                    dt = new DataTable();
+                    da.Fill(dt);
+
+                    
+
+                    if (dt.Rows.Count > 0)
+                    {
+                        DataRow datarow = dt.Rows[0];
+                        string role = datarow["Role"].ToString();
+                        frm.Role = role;
+                        frm.ShowDialog();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Tên đăng nhập hoặc mật khẩu không đúng.");
+                    }
+
+                    cnn.Close();
+
+                }
+                catch (Exception es)
+                {
+                    MessageBox.Show(es.ToString());
+                }
             }
-
-            // Tạo câu lệnh SQL để kiểm tra đăng nhập
-            string sql = $"SELECT * FROM tblDangnhap WHERE Username = '{username}' AND Password = '{password}'";
-
-            // Thực hiện truy vấn và lấy dữ liệu
-            DataTable dt = Functions.GetDataToTable(sql);
-
-            // Kiểm tra kết quả truy vấn
-            if (dt.Rows.Count > 0)
-            {
-                MessageBox.Show("Đăng nhập thành công!");
-                // Bạn có thể thực hiện các thao tác chuyển form hoặc làm gì đó tại đây
-                frmMain frm = new frmMain();
-                frm.ShowDialog();
-
-            }
-            else
-            {
-                MessageBox.Show("Tên đăng nhập hoặc mật khẩu không đúng.");
-            }
-
-            // Đóng kết nối
-            //Functions.Disconnect();
-
         }
 
         private void txtpassword_TextChanged(object sender, EventArgs e)
