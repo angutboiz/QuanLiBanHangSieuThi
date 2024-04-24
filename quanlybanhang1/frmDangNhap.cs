@@ -19,23 +19,11 @@ namespace quanlybanhang1
         SqlConnection cnn;
         SqlDataAdapter da;
         DataTable dt;
-        SqlDataReader dr;
-        SqlCommand cmd;
         string connectionString = @"Data Source=DESKTOP-8T8L9ET;Initial Catalog=QLBanHangSieuThi;Trusted_Connection=True";
 
         public frmDangNhap()
         {
             InitializeComponent();
-        }
-
-        private void txbUserName_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void panel1_Paint(object sender, PaintEventArgs e)
-        {
-
         }
 
         private void btnExit_Click(object sender, EventArgs e)
@@ -90,16 +78,6 @@ namespace quanlybanhang1
                     MessageBox.Show(es.ToString());
                 }
             }
-        }
-
-        private void txtpassword_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void frmDangNhap_Load(object sender, EventArgs e)
-        {
-
         }
     }
 }

@@ -43,85 +43,6 @@ namespace quanlybanhang1.Class
             }
         }
 
-        public static void Query(string query, DataGridView table, DataTable dataTable)
-        {
-            try
-            {
-                cnn = new SqlConnection(connectionString);
-                cnn.Open();
-
-                da = new SqlDataAdapter(query, cnn);
-                dataTable = new DataTable();
-                da.Fill(dataTable);
-
-                table.DataSource = dataTable;
-
-                cnn.Close();
-
-            }
-            catch (Exception es)
-            {
-                MessageBox.Show(es.ToString());
-
-            }
-        }
-
-        //CRUD, create, read, update and delete, truyền 
-        //thêm queryReloadTable để làm mới data ở table cần
-        public static void ExecCRUD(string query, string queryReloadTable, DataGridView table, string notify)
-        {
-            try
-            {
-                cnn = new SqlConnection(connectionString);
-                cnn.Open();
-
-
-                cmd = new SqlCommand(query, cnn);
-
-                cmd.ExecuteNonQuery();
-
-                if (notify != "") MessageBox.Show(notify);
-                Connect(queryReloadTable, table);
-                cnn.Close();
-
-            }
-            catch (Exception es)
-            {
-                MessageBox.Show(es.ToString());
-
-            }
-        }
-
-        public static bool DatabaseExists()
-        {
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    connection.Open();
-                    return true;
-                }
-            }
-            catch (SqlException)
-            {
-                return false;
-            }
-        }
-
-        public static DataTable GetDataToTable(string sql)
-        {
-            if (cnn == null || cnn.State != ConnectionState.Open)
-            {
-                MessageBox.Show("Kết nối chưa sẵn sàng!");
-                return null;
-            }
-
-            SqlDataAdapter dap = new SqlDataAdapter(sql, cnn);
-            DataTable table = new DataTable();
-            dap.Fill(table);
-            return table;
-        }
-
         //Hàm kiểm tra khoá trùng
         public static bool CheckKey(string sqlQuery)
         {
@@ -144,135 +65,21 @@ namespace quanlybanhang1.Class
 
             return exists;
         }
-        public static void RunSqlDel(string sql)
+
+        public static bool DatabaseExists()
         {
-            SqlCommand cmd = new SqlCommand();
-            cmd.Connection = cnn;
-            cmd.CommandText = sql;
             try
             {
-                cmd.ExecuteNonQuery();
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    return true;
+                }
             }
-            catch (Exception ex)
+            catch (SqlException)
             {
-                //MessageBox.Show("Dữ liệu đang được dùng, không thể xoá...", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                MessageBox.Show(ex.ToString());
+                return false;
             }
-            cmd.Dispose();
-            cmd = null;
-        }
-        public static bool IsDate(string date)
-        {
-            string[] elements = date.Split('/');
-            if ((Convert.ToInt32(elements[0]) >= 1) && (Convert.ToInt32(elements[0]) <= 31) && (Convert.ToInt32(elements[1]) >= 1) && (Convert.ToInt32(elements[1]) <= 12) && (Convert.ToInt32(elements[2]) >= 1900))
-                return true;
-            else return false;
-        }
-        public static string ConvertDateTime(string date)
-        {
-            string[] elements = date.Split('/');
-            string dt = string.Format("{0}/{1}/{2}", elements[0], elements[1], elements[2]);
-            return dt;
-        }
-
-
-
-        public static string GetFieldValues(string sql)
-        {
-            string ma = "";
-            SqlCommand cmd = new SqlCommand(sql, cnn);
-            SqlDataReader reader;
-            reader = cmd.ExecuteReader();
-            while (reader.Read())
-                ma = reader.GetValue(0).ToString();
-            reader.Close();
-            return ma;
-        }
-
-        //Hàm tạo khóa có dạng: TientoNgaythangnam_giophutgiay
-        public static string CreateKey(string tiento)
-        {
-            string key = tiento;
-            string[] partsDay;
-            partsDay = DateTime.Now.ToShortDateString().Split('/');
-            //Ví dụ 07/08/2009
-            string d = String.Format("{0}{1}{2}", partsDay[0], partsDay[1], partsDay[2]);
-            key = key + d;
-            string[] partsTime;
-            partsTime = DateTime.Now.ToLongTimeString().Split(':');
-            //Ví dụ 7:08:03 PM hoặc 7:08:03 AM
-            if (partsTime[2].Substring(3, 2) == "PM")
-                partsTime[0] = ConvertTimeTo24(partsTime[0]);
-            if (partsTime[2].Substring(3, 2) == "AM")
-                if (partsTime[0].Length == 1)
-                    partsTime[0] = "0" + partsTime[0];
-            //Xóa ký tự trắng và PM hoặc AM
-            partsTime[2] = partsTime[2].Remove(2, 3);
-            string t;
-            t = String.Format("_{0}{1}{2}", partsTime[0], partsTime[1], partsTime[2]);
-            key = key + t;
-            return key;
-        }
-
-
-
-        //Chuyển đổi từ PM sang dạng 24h
-        public static string ConvertTimeTo24(string hour)
-        {
-            string h = "";
-            switch (hour)
-            {
-                case "1":
-                    h = "13";
-                    break;
-                case "2":
-                    h = "14";
-                    break;
-                case "3":
-                    h = "15";
-                    break;
-                case "4":
-                    h = "16";
-                    break;
-                case "5":
-                    h = "17";
-                    break;
-                case "6":
-                    h = "18";
-                    break;
-                case "7":
-                    h = "19";
-                    break;
-                case "8":
-                    h = "20";
-                    break;
-                case "9":
-                    h = "21";
-                    break;
-                case "10":
-                    h = "22";
-                    break;
-                case "11":
-                    h = "23";
-                    break;
-                case "12":
-                    h = "0";
-                    break;
-            }
-            return h;
-        }
-
-
-
-
-        public static void FillCombo(string sql, ComboBox cbo, string ma, string ten)
-        {
-            SqlDataAdapter dap = new SqlDataAdapter(sql, cnn);
-            DataTable table = new DataTable();
-            dap.Fill(table);
-            cbo.DataSource = table;
-            cbo.ValueMember = ma; //Trường giá trị
-            cbo.DisplayMember = ten; //Trường hiển thị
         }
 
         public static string ConvertMoneyToWords(decimal inputNumber, bool suffix = true)
@@ -366,6 +173,46 @@ namespace quanlybanhang1.Class
 
         }
 
+
+        public static string RemoveDot(string number)
+        {
+            return number.Replace(",", "");
+        }
+
+
+        public static void FormatNumberWithCommas(TextBox txb)
+        {
+            // Lưu vị trí con trỏ hiện tại
+            int currentCursorPosition = txb.SelectionStart;
+
+            // Xóa dấu phẩy và chuyển về chuỗi không có dấu phẩy
+            string originalText = txb.Text.Replace(",", "");
+
+            // Kiểm tra và thêm dấu phẩy sau mỗi 3 số
+            int length = originalText.Length;
+            if (length > 3)
+            {
+                int count = 0;
+                StringBuilder formattedText = new StringBuilder();
+
+                for (int i = length - 1; i >= 0; i--)
+                {
+                    formattedText.Insert(0, originalText[i]);
+                    count++;
+
+                    if (count == 3 && i > 0)
+                    {
+                        formattedText.Insert(0, ",");
+                        count = 0; // Đặt lại count sau khi thêm dấu phẩy
+                    }
+                }
+
+                txb.Text = formattedText.ToString();
+            }
+
+            // Đặt lại vị trí con trỏ
+            txb.SelectionStart = currentCursorPosition + (txb.Text.Length - originalText.Length);
+        }
     }
 }
 

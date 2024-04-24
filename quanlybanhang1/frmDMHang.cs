@@ -21,11 +21,22 @@ namespace quanlybanhang1
         SqlCommand cmd;
         string connectionString = @"Data Source=DESKTOP-8T8L9ET;Initial Catalog=QLBanHangSieuThi;Trusted_Connection=True";
 
-        string queryTable = @"select mahh,tenhh,tenlh,gianhap,giaban,soluong,ghichu,hinhanh from hanghoa 
+        string queryTable = @"select mahh,
+                                    tenhh,
+                                    tenlh,
+                                    FORMAT(gianhap, '#,##0') as gianhap,
+                                    FORMAT(giaban, '#,##0') as giaban,
+                                    FORMAT(soluong, '#,##0') as soluong,
+                                    ghichu,
+                                    hinhanh from hanghoa 
                             INNER JOIN loaihang ON hanghoa.malh = loaihang.malh where isRemove = 0";
         public frmDMHang()
         {
             InitializeComponent();
+        }
+        string RemoveDot(string number)
+        {
+            return number.Replace(",", "");
         }
 
         private void frmDMHang_Load(object sender, EventArgs e)
@@ -135,20 +146,22 @@ namespace quanlybanhang1
 
         private void btnThem_Click(object sender, EventArgs e)
         {
+            decimal gianhap = decimal.Parse(Functions.RemoveDot(txtDonGiaNhap.Text));
+            decimal giaban = decimal.Parse(Functions.RemoveDot(txtDonGiaBan.Text));
             if (CheckValidation())
             {
-                string query = "INSERT INTO hanghoa (malh,tenhh,gianhap,giaban,soluong,ghichu,hinhanh) VALUES('" + txbMaLH.Text +"',N'" + txtTenHang.Text +
-                    "'," + float.Parse(txtDonGiaNhap.Text) + "," + float.Parse(txtDonGiaBan.Text) +
+                string query = "INSERT INTO hanghoa (malh,tenhh,gianhap,giaban,soluong,ghichu,hinhanh) VALUES('" + txbMaLH.Text + "',N'" + txtTenHang.Text +
+                    "'," + gianhap + "," + giaban +
                     "," + int.Parse(txtSoLuong.Text) + ",'" + txtGhiChu.Text + "',N'" + txtAnh.Text.Trim() + "')";
 
-                ExecCRUD(query, "Thêm thành công Mặt hàng: " +txtTenHang.Text);
+                ExecCRUD(query, "Thêm thành công Mặt hàng: " + txtTenHang.Text);
                 Query(queryTable);
                 ResetValues();
 
-                
+
             }
 
-           
+
         }
 
         private bool CheckValidation()
@@ -196,12 +209,14 @@ namespace quanlybanhang1
 
         private void btnSua_Click(object sender, EventArgs e)
         {
-           
-           if (CheckValidation())
+            decimal gianhap = decimal.Parse(Functions.RemoveDot(txtDonGiaNhap.Text));
+            decimal giaban = decimal.Parse(Functions.RemoveDot(txtDonGiaBan.Text));
+
+            if (CheckValidation())
             {
                 string query = "UPDATE hanghoa SET tenhh=N'" + txtTenHang.Text.Trim() +
-                "', gianhap=" + float.Parse(txtDonGiaNhap.Text) +
-                ", giaban=" + float.Parse(txtDonGiaBan.Text) +
+                "', gianhap=" + gianhap +
+                ", giaban=" + giaban +
                 ", SoLuong=" + int.Parse(txtSoLuong.Text) +
                 ", ghichu=N'" + txtGhiChu.Text +
                 "', hinhanh='" + txtAnh.Text +
@@ -209,24 +224,6 @@ namespace quanlybanhang1
 
                 ExecCRUD(query,"Sửa thành công Mặt hàng: "+ txtTenHang.Text);
                 Query(queryTable);
-                ResetValues();
-            }
-        }
-
-        private void btnXoa_Click(object sender, EventArgs e)
-        {
-
-            string sql;
-          
-            if (txtMaHang.Text == "")
-            {
-                MessageBox.Show("Bạn chưa chọn bản ghi nào", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-            if (MessageBox.Show("Bạn có muốn xoá bản ghi này không?", "Thông báo", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-            {
-                sql = "DELETE tblHang WHERE MaHang=N'" + txtMaHang.Text + "'";
-                Functions.RunSqlDel(sql);
                 ResetValues();
             }
         }
@@ -247,11 +244,6 @@ namespace quanlybanhang1
         private void btnDong_Click(object sender, EventArgs e)
         {
             this.Close();
-        }
-
-        private void txtMaHang_TextChanged(object sender, EventArgs e)
-        {
-
         }
 
         private void dgvHang_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
@@ -280,9 +272,9 @@ namespace quanlybanhang1
             txtMaHang.Text = dt.Rows[row][0].ToString();
             txtTenHang.Text = dt.Rows[row][1].ToString();
             cbLoaiHang.Text = dt.Rows[row][2].ToString();
-            txtDonGiaNhap.Text = dt.Rows[row][3].ToString();
-            txtDonGiaBan.Text = dt.Rows[row][4].ToString();
-            txtSoLuong.Text = dt.Rows[row][5].ToString();
+            txtDonGiaNhap.Text = RemoveDot(dt.Rows[row][3].ToString());
+            txtDonGiaBan.Text = RemoveDot(dt.Rows[row][4].ToString());
+            txtSoLuong.Text = RemoveDot(dt.Rows[row][5].ToString());
             txtGhiChu.Text = dt.Rows[row][6].ToString();
             txtAnh.Text = dt.Rows[row][7].ToString();
             picAnh.ImageLocation = txtAnh.Text;
@@ -381,6 +373,18 @@ namespace quanlybanhang1
         private void btnClear_Click(object sender, EventArgs e)
         {
             ResetValues();
+        }
+
+        private void txtDonGiaBan_TextChanged(object sender, EventArgs e)
+        {
+            Functions.FormatNumberWithCommas(txtDonGiaBan);
+
+        }
+
+        private void txtDonGiaNhap_TextChanged(object sender, EventArgs e)
+        {
+            Functions.FormatNumberWithCommas(txtDonGiaNhap);
+
         }
     }
 }

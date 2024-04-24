@@ -16,7 +16,6 @@ namespace quanlybanhang1
         SqlConnection cnn;
         SqlDataAdapter da;
         DataTable dt;
-        SqlDataReader dr;
         SqlCommand cmd;
         string connectionString = @"Data Source=DESKTOP-8T8L9ET;Initial Catalog=QLBanHangSieuThi;Trusted_Connection=True";
 

@@ -137,7 +137,6 @@
             this.dgvBaoCao.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dgvBaoCao.Size = new System.Drawing.Size(776, 247);
             this.dgvBaoCao.TabIndex = 8;
-            this.dgvBaoCao.DataSourceChanged += new System.EventHandler(this.dgvBaoCao_DataSourceChanged);
             // 
             // groupBox1
             // 

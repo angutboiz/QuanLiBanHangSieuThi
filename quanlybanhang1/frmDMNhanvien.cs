@@ -23,7 +23,7 @@ namespace quanlybanhang1
         SqlCommand cmd;
         string connectionString = @"Data Source=DESKTOP-8T8L9ET;Initial Catalog=QLBanHangSieuThi;Trusted_Connection=True";
 
-        string queryTable = "select manv,tennv,gioitinh,sdt,ngaysinh,diachi,username,password,role from nhanvien where isremove = 0 and role != 'admin'";
+        string queryTable = "select manv,tennv,gioitinh,sdt,ngaysinh,diachi,username,password,role from nhanvien where isremove = 0";
 
         public frmDMNhanvien()
         {
@@ -79,6 +79,7 @@ namespace quanlybanhang1
                 cmd = new SqlCommand(query, cnn);
 
                 cmd.ExecuteNonQuery();
+                Query(queryTable);
 
                 if (notify != "") MessageBox.Show(notify);
                 
@@ -264,7 +265,7 @@ namespace quanlybanhang1
             try
             {
 
-                DialogResult res = MessageBox.Show("Bạn có chắc muốn xóa?", "Thông báo", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                DialogResult res = MessageBox.Show("Bạn có chắc muốn xóa nhân viên: " + txtTenNhanVien.Text, "Thông báo", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (res == DialogResult.Yes)
                 {
                     string query = "UPDATE nhanvien SET isRemove = 1 WHERE manv ='" + txtMaNhanVien.Text + "'";
@@ -283,6 +284,11 @@ namespace quanlybanhang1
         {
             if (!(e.KeyChar >= '0' && e.KeyChar <= '9' || e.KeyChar == (char)8))
                 e.Handled = true;
+        }
+
+        private void txtUser_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

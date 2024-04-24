@@ -31,11 +31,10 @@ namespace quanlybanhang1
 
         private void frmDMKhachHang_Load(object sender, EventArgs e)
         {
+
             ResetValues();
             if (Functions.DatabaseExists())
             {
-                txtMaKhach.Enabled = false;
-               
 
                 Query(queryTable);
             }
@@ -144,42 +143,32 @@ namespace quanlybanhang1
         {
             if (CheckValidation())
             {
+                string sqlValidation = "SELECT sdt FROM khachhang WHERE sdt=N'" + txbDienThoai.Text + "'";
+                if (CheckKey(sqlValidation))
+                {
+                    MessageBox.Show("Số điện thoại này đã có, bạn không được phép nhập trùng sđt", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    txbDienThoai.Focus();
+                }
+                else
+                {
+                    string query = "INSERT INTO khachhang (tenkh,sdt,diachi) VALUES (N'" + txtTenKhach.Text.Trim() + "','" + txbDienThoai.Text + "',N'" + txtDiaChi.Text.Trim() + "')";
 
-                string query = "INSERT INTO khachhang (tenkh,sdt,diachi) VALUES (N'" + txtTenKhach.Text.Trim() + "','" + txbDienThoai.Text + "',N'" + txtDiaChi.Text.Trim() + "')";
-
-                ExecCRUD(query, "Thêm thành công nhân viên: " + txtTenKhach.Text);
-                Query(queryTable);
+                    ExecCRUD(query, "Thêm thành công nhân viên: " + txtTenKhach.Text);
+                    Query(queryTable);
                 
-                ResetValues();
+                    ResetValues();
+                }
             }
         }
 
 
         private void ResetValues()
         {
+
             txtMaKhach.Text = "";
             txtTenKhach.Text = "";
             txtDiaChi.Text = "";
             txbDienThoai.Text = "";
-        }
-       
-        private void btnLuu_Click(object sender, EventArgs e)
-        {
-            CheckValidation();
-            string sql;
-            
-            //Kiểm tra đã tồn tại mã khách chưa
-            sql = "SELECT MaKhach FROM tblKhach WHERE MaKhach=N'" + txtMaKhach.Text.Trim() + "'";
-            if (Functions.CheckKey(sql))
-            {
-                MessageBox.Show("Mã khách này đã tồn tại", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                txtMaKhach.Focus();
-                return;
-            }
-
-            ResetValues();
-
-            
         }
 
         private void btnSua_Click(object sender, EventArgs e)
@@ -236,9 +225,11 @@ namespace quanlybanhang1
             int row = e.RowIndex;
             txtMaKhach.Text = dt.Rows[row][0].ToString();
             txtTenKhach.Text = dt.Rows[row][1].ToString();
-            txtDiaChi.Text = dt.Rows[row][2].ToString();
-            txbDienThoai.Text = dt.Rows[row][3].ToString();
-            
+            txbDienThoai.Text = dt.Rows[row][2].ToString();
+            txtDiaChi.Text = dt.Rows[row][3].ToString();
+
+            btnSua.Enabled = true;
+
         }
 
         private void txtSearch_TextChanged(object sender, EventArgs e)
@@ -276,6 +267,16 @@ namespace quanlybanhang1
         private void btnClear_Click(object sender, EventArgs e)
         {
             ResetValues();
+        }
+
+        private void txtTenKhach_TextChanged(object sender, EventArgs e)
+        {
+          
+        }
+
+        private void txbDienThoai_TextChanged(object sender, EventArgs e)
+        {
+           
         }
     }
 }

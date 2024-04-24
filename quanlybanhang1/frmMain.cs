@@ -15,6 +15,7 @@ namespace quanlybanhang1
     public partial class frmMain : Form
     {
         public string Role { get; set; }
+       // public string Role { get; set; }
 
         public frmMain()
         {
@@ -27,10 +28,13 @@ namespace quanlybanhang1
             if (Role == "Nhân viên")
             {
                 btnNhanVien.Enabled = false;
+                lbHello.Visible = false;
             }
             else if (Role == "Admin")
             {
                 btnNhanVien.Enabled = true;
+                lbHello.Visible = true;
+
             }
 
         }

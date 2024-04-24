@@ -55,11 +55,6 @@ namespace quanlybanhang1
 
         }
 
-        string RemoveDot(string number)
-        {
-            return number.Replace(",", "");
-        }
-
         private void CountAmount()
         {
             decimal chi = 0;
@@ -79,18 +74,18 @@ namespace quanlybanhang1
                 //Kiểm tra xem dòng đó có phải là dòng dữ liệu hợp lệ hay không
                 if (row.IsNewRow) continue;
 
-                tongtienRow = decimal.Parse(RemoveDot(row.Cells["Tổng tiền"].Value.ToString()));
-                gianhap = decimal.Parse(RemoveDot(row.Cells["Giá nhập"].Value.ToString()));
-                giaban = decimal.Parse(RemoveDot(row.Cells["Giá bán"].Value.ToString()));
-                soluong = int.Parse(RemoveDot(row.Cells["Số lượng"].Value.ToString()));
+                tongtienRow = decimal.Parse(Functions.RemoveDot(row.Cells["Tổng tiền"].Value.ToString()));
+                gianhap = decimal.Parse(Functions.RemoveDot(row.Cells["Giá nhập"].Value.ToString()));
+                giaban = decimal.Parse(Functions.RemoveDot(row.Cells["Giá bán"].Value.ToString()));
+                soluong = int.Parse(Functions.RemoveDot(row.Cells["Số lượng"].Value.ToString()));
 
-                chi = (giaban - gianhap) * soluong;
+                chi = tongtienRow - (gianhap * soluong);
                 loinhuan = tongtienRow - chi;
 
                 tongchi += chi;
                 tongloinhuan += loinhuan;
                 tongtien += tongtienRow;
-                // MessageBox.Show("Giá nhập: " + gianhap + "\nGía bán: " + giaban + "\nSo luog: " + soluong +"\nTong tien: "+tongtienRow+ "\nChi: " + chi + "\nloi nhuan: " + loinhuan);
+                 //MessageBox.Show("Giá nhập: " + gianhap + "\nGía bán: " + giaban + "\nSo luog: " + soluong +"\nTong tien: "+tongtienRow+ "\nChi: " + chi + "\nloi nhuan: " + loinhuan);
             }
 
 
@@ -98,9 +93,9 @@ namespace quanlybanhang1
 
             txbDoanhThu.Text = string.Format("{0:#,##0}", tongtien);
 
-            txbChi.Text = string.Format("{0:#,##0}", tongchi);
+            txbChi.Text = string.Format("{0:#,##0}", tongloinhuan);
 
-            txbLoiNhuan.Text = string.Format("{0:#,##0}", tongloinhuan);
+            txbLoiNhuan.Text = string.Format("{0:#,##0}", tongchi);
 
             if (tongtien > 0)
             {
@@ -155,10 +150,6 @@ namespace quanlybanhang1
             }
         }
 
-        private void dgvBaoCao_DataSourceChanged(object sender, EventArgs e)
-        {
-        }
-
         private void button1_Click(object sender, EventArgs e)
         {
             foreach (Control control in this.Controls)
@@ -172,20 +163,13 @@ namespace quanlybanhang1
             Query(queryTable);
         }
 
-        string yearmuch = "";
-        string yearless = "";
-        string monthmuch = "";
-        string monthless = "";
-        string nvmonth = "";
-        string nvyear = "";
-
         private void rbYearMuch_CheckedChanged(object sender, EventArgs e)
         {
             if (rbYearMuch.Checked)
             {
                 string query = @"SELECT
                                     YEAR(hoadon.NgayLap) AS ""Năm"",
-                                    SUM(hoadon.TongTien) AS ""Tổng tiền năm kiếm được nhiều nhất""
+                                    FORMAT(SUM(hoadon.TongTien), '#,##0') AS ""Tổng tiền năm kiếm được nhiều nhất""
 
                                 FROM 
                                     HoaDon
@@ -214,7 +198,7 @@ namespace quanlybanhang1
                 string query = @"SELECT
                                     MONTH(hoadon.NgayLap) AS ""Tháng nhiều nhất"",
                                     YEAR(hoadon.NgayLap) AS ""Năm"",
-                                    SUM(hoadon.TongTien) AS ""Tổng tiền tháng kiếm được""
+                                    FORMAT(SUM(hoadon.TongTien), '#,##0') AS ""Tổng tiền tháng kiếm được""
 
                                 FROM 
                                     HoaDon
@@ -281,7 +265,7 @@ namespace quanlybanhang1
                                     Month(HoaDon.NgayLap) AS Tháng,                                    
                                     YEAR(HoaDon.NgayLap) AS Năm,
 
-                                    SUM(HoaDon.SoLuong) AS ""Tổng số lượng bán được trong tháng""
+                                    SUM(HoaDon.SoLuong) AS ""Tổng số lượng bán được""
 
                                 FROM 
                                     HoaDon
@@ -295,7 +279,7 @@ namespace quanlybanhang1
                                     NhanVien.TenNV, month(HoaDon.NgayLap), YEAR(HoaDon.NgayLap)
 
                                 ORDER BY 
-                                    ""Tổng số lượng bán được trong tháng"" DESC";
+                                    ""Tổng số lượng bán được"" DESC";
 
                 Query(query);
             }
@@ -326,11 +310,6 @@ namespace quanlybanhang1
 
                 Query(query);
             }
-        }
-
-        private void rbSPBanChay_CheckedChanged(object sender, EventArgs e)
-        {
-
         }
 
         private void rbSPBanChayMonth_CheckedChanged(object sender, EventArgs e)

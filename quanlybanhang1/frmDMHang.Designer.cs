@@ -30,6 +30,15 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmDMHang));
             this.panel1 = new System.Windows.Forms.Panel();
+            this.dgvHang = new System.Windows.Forms.DataGridView();
+            this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.soluong = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column8 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.btnFormLoaiHang = new System.Windows.Forms.Button();
             this.txbMaLH = new System.Windows.Forms.TextBox();
             this.label12 = new System.Windows.Forms.Label();
@@ -60,19 +69,10 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.dgvHang = new System.Windows.Forms.DataGridView();
-            this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.soluong = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column8 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.panel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvHang)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picAnh)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvHang)).BeginInit();
             this.SuspendLayout();
             // 
             // panel1
@@ -115,6 +115,93 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(1083, 577);
             this.panel1.TabIndex = 0;
+            // 
+            // dgvHang
+            // 
+            this.dgvHang.AllowUserToAddRows = false;
+            this.dgvHang.AllowUserToDeleteRows = false;
+            this.dgvHang.AllowUserToResizeColumns = false;
+            this.dgvHang.AllowUserToResizeRows = false;
+            this.dgvHang.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dgvHang.BackgroundColor = System.Drawing.Color.White;
+            this.dgvHang.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
+            this.dgvHang.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvHang.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.Column1,
+            this.Column2,
+            this.Column3,
+            this.Column4,
+            this.Column5,
+            this.soluong,
+            this.Column7,
+            this.Column8});
+            this.dgvHang.Location = new System.Drawing.Point(3, 273);
+            this.dgvHang.Name = "dgvHang";
+            this.dgvHang.ReadOnly = true;
+            this.dgvHang.RowHeadersVisible = false;
+            this.dgvHang.RowTemplate.Height = 24;
+            this.dgvHang.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.dgvHang.Size = new System.Drawing.Size(1077, 229);
+            this.dgvHang.TabIndex = 30;
+            this.dgvHang.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dgvHang_CellMouseDoubleClick);
+            this.dgvHang.RowEnter += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvHang_RowEnter);
+            this.dgvHang.RowPrePaint += new System.Windows.Forms.DataGridViewRowPrePaintEventHandler(this.dgvHang_RowPrePaint);
+            // 
+            // Column1
+            // 
+            this.Column1.DataPropertyName = "mahh";
+            this.Column1.HeaderText = "Mã hàng hóa";
+            this.Column1.Name = "Column1";
+            this.Column1.ReadOnly = true;
+            // 
+            // Column2
+            // 
+            this.Column2.DataPropertyName = "tenhh";
+            this.Column2.HeaderText = "Tên hàng hóa";
+            this.Column2.Name = "Column2";
+            this.Column2.ReadOnly = true;
+            // 
+            // Column3
+            // 
+            this.Column3.DataPropertyName = "tenlh";
+            this.Column3.HeaderText = "Tên loại hàng";
+            this.Column3.Name = "Column3";
+            this.Column3.ReadOnly = true;
+            // 
+            // Column4
+            // 
+            this.Column4.DataPropertyName = "gianhap";
+            this.Column4.HeaderText = "Giá nhập";
+            this.Column4.Name = "Column4";
+            this.Column4.ReadOnly = true;
+            // 
+            // Column5
+            // 
+            this.Column5.DataPropertyName = "giaban";
+            this.Column5.HeaderText = "Giá bán";
+            this.Column5.Name = "Column5";
+            this.Column5.ReadOnly = true;
+            // 
+            // soluong
+            // 
+            this.soluong.DataPropertyName = "soluong";
+            this.soluong.HeaderText = "Số lượng";
+            this.soluong.Name = "soluong";
+            this.soluong.ReadOnly = true;
+            // 
+            // Column7
+            // 
+            this.Column7.DataPropertyName = "ghichu";
+            this.Column7.HeaderText = "Ghi chú";
+            this.Column7.Name = "Column7";
+            this.Column7.ReadOnly = true;
+            // 
+            // Column8
+            // 
+            this.Column8.DataPropertyName = "hinhanh";
+            this.Column8.HeaderText = "Hình ảnh";
+            this.Column8.Name = "Column8";
+            this.Column8.ReadOnly = true;
             // 
             // btnFormLoaiHang
             // 
@@ -333,6 +420,7 @@
             this.txtDonGiaBan.Name = "txtDonGiaBan";
             this.txtDonGiaBan.Size = new System.Drawing.Size(185, 22);
             this.txtDonGiaBan.TabIndex = 4;
+            this.txtDonGiaBan.TextChanged += new System.EventHandler(this.txtDonGiaBan_TextChanged);
             this.txtDonGiaBan.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtDonGiaBan_KeyPress);
             // 
             // txtDonGiaNhap
@@ -342,6 +430,7 @@
             this.txtDonGiaNhap.Name = "txtDonGiaNhap";
             this.txtDonGiaNhap.Size = new System.Drawing.Size(183, 22);
             this.txtDonGiaNhap.TabIndex = 3;
+            this.txtDonGiaNhap.TextChanged += new System.EventHandler(this.txtDonGiaNhap_TextChanged);
             this.txtDonGiaNhap.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtDonGiaNhap_KeyPress);
             // 
             // txtSoLuong
@@ -369,7 +458,6 @@
             this.txtMaHang.Name = "txtMaHang";
             this.txtMaHang.Size = new System.Drawing.Size(183, 22);
             this.txtMaHang.TabIndex = 6;
-            this.txtMaHang.TextChanged += new System.EventHandler(this.txtMaHang_TextChanged);
             // 
             // label6
             // 
@@ -431,93 +519,6 @@
             this.label1.TabIndex = 0;
             this.label1.Text = "Mã hàng";
             // 
-            // dgvHang
-            // 
-            this.dgvHang.AllowUserToAddRows = false;
-            this.dgvHang.AllowUserToDeleteRows = false;
-            this.dgvHang.AllowUserToResizeColumns = false;
-            this.dgvHang.AllowUserToResizeRows = false;
-            this.dgvHang.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.dgvHang.BackgroundColor = System.Drawing.Color.White;
-            this.dgvHang.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
-            this.dgvHang.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvHang.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.Column1,
-            this.Column2,
-            this.Column3,
-            this.Column4,
-            this.Column5,
-            this.soluong,
-            this.Column7,
-            this.Column8});
-            this.dgvHang.Location = new System.Drawing.Point(3, 273);
-            this.dgvHang.Name = "dgvHang";
-            this.dgvHang.ReadOnly = true;
-            this.dgvHang.RowHeadersVisible = false;
-            this.dgvHang.RowTemplate.Height = 24;
-            this.dgvHang.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvHang.Size = new System.Drawing.Size(1077, 229);
-            this.dgvHang.TabIndex = 30;
-            this.dgvHang.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dgvHang_CellMouseDoubleClick);
-            this.dgvHang.RowEnter += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvHang_RowEnter);
-            this.dgvHang.RowPrePaint += new System.Windows.Forms.DataGridViewRowPrePaintEventHandler(this.dgvHang_RowPrePaint);
-            // 
-            // Column1
-            // 
-            this.Column1.DataPropertyName = "mahh";
-            this.Column1.HeaderText = "Mã hàng hóa";
-            this.Column1.Name = "Column1";
-            this.Column1.ReadOnly = true;
-            // 
-            // Column2
-            // 
-            this.Column2.DataPropertyName = "tenhh";
-            this.Column2.HeaderText = "Tên hàng hóa";
-            this.Column2.Name = "Column2";
-            this.Column2.ReadOnly = true;
-            // 
-            // Column3
-            // 
-            this.Column3.DataPropertyName = "tenlh";
-            this.Column3.HeaderText = "Tên loại hàng";
-            this.Column3.Name = "Column3";
-            this.Column3.ReadOnly = true;
-            // 
-            // Column4
-            // 
-            this.Column4.DataPropertyName = "gianhap";
-            this.Column4.HeaderText = "Giá nhập";
-            this.Column4.Name = "Column4";
-            this.Column4.ReadOnly = true;
-            // 
-            // Column5
-            // 
-            this.Column5.DataPropertyName = "giaban";
-            this.Column5.HeaderText = "Giá bán";
-            this.Column5.Name = "Column5";
-            this.Column5.ReadOnly = true;
-            // 
-            // soluong
-            // 
-            this.soluong.DataPropertyName = "soluong";
-            this.soluong.HeaderText = "Số lượng";
-            this.soluong.Name = "soluong";
-            this.soluong.ReadOnly = true;
-            // 
-            // Column7
-            // 
-            this.Column7.DataPropertyName = "ghichu";
-            this.Column7.HeaderText = "Ghi chú";
-            this.Column7.Name = "Column7";
-            this.Column7.ReadOnly = true;
-            // 
-            // Column8
-            // 
-            this.Column8.DataPropertyName = "hinhanh";
-            this.Column8.HeaderText = "Hình ảnh";
-            this.Column8.Name = "Column8";
-            this.Column8.ReadOnly = true;
-            // 
             // frmDMHang
             // 
             this.AcceptButton = this.btnThem;
@@ -533,9 +534,9 @@
             this.Load += new System.EventHandler(this.frmDMHang_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvHang)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picAnh)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvHang)).EndInit();
             this.ResumeLayout(false);
 
         }

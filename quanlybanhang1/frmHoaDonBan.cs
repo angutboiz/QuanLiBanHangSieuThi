@@ -19,7 +19,6 @@ namespace quanlybanhang1
         SqlConnection cnn;
         SqlDataAdapter da;
         DataTable dt;
-        SqlDataReader dr;
         SqlCommand cmd;
         string connectionString = @"Data Source=DESKTOP-8T8L9ET;Initial Catalog=QLBanHangSieuThi;Trusted_Connection=True";
 
@@ -31,7 +30,7 @@ namespace quanlybanhang1
                                 HoaDon.SoLuong,
 
                                 HoaDon.NgayLap,
-                                HoaDon.TongTien,                                
+                                FORMAT(HoaDon.TongTien, '#,##0') as TongTien,                                
                                 HoaDon.ThanhToan,                                
                                 HoaDon.isRemove
 
@@ -47,10 +46,10 @@ namespace quanlybanhang1
                             WHERE 
                                 ThanhToan = 0 and HoaDon.isRemove = 0";
 
-        int dongia = 0;
-        int soluong = 0;
-        int giamgia = 0;
-        int thanhtien = 0;
+        decimal dongia = 0;
+        int soluong = 1;
+        decimal giamgia = 0;
+        decimal thanhtien = 0;
         decimal tongtien = 0;
 
         public frmHoaDonBan()
@@ -67,13 +66,13 @@ namespace quanlybanhang1
                 txtMaKhach.Enabled = false;
 
                 Query(queryTable);
-                string queryComboBox = "select manv,tennv from nhanvien";
+                string queryComboBox = "select manv,tennv from nhanvien where isremove = 0 and role != 'admin'";
                 FillDataComboBox(queryComboBox,"tennv", cbTenNV);
 
-                queryComboBox = "select mahh,tenhh,soluong from hanghoa where soluong > 0";
+                queryComboBox = "select mahh,tenhh,soluong from hanghoa where soluong > 0 and isremove = 0";
                 FillDataComboBox(queryComboBox,"tenhh", cbTenHang);
 
-                queryComboBox = "select makh,tenkh from khachhang";
+                queryComboBox = "select makh,tenkh from khachhang where isremove = 0";
                 FillDataComboBox(queryComboBox, "tenkh", cbTenKH);
 
                 cbLocKH.Items.Add("");
@@ -265,22 +264,35 @@ namespace quanlybanhang1
         {
             if (CheckValidation())
             {
+
+                int hangton = int.Parse(txbSLKho.Text);
+
                 int soluong = int.Parse(txtSoLuong.Text);
                 int mahang = int.Parse(txbMaHang.Text);
-                if (CheckValidation())
+
+                if (soluong > hangton)
+                {
+                    MessageBox.Show("Trong kho còn " + hangton + " cái\nVui lòng không nhập quá số lượng trong kho");
+                    txtSoLuong.Text = "";
+                }
+                else
                 {
                     string query = @"insert into hoadon (makh,manv,mahh,ngaylap,soluong,tongtien) values ('"
-                                    +txtMaKhach.Text+"','"+txbMaNV.Text+"','"+txbMaHang.Text+"','"+dtpNgayBan.Value.ToString("yyyy-MM-dd HH:mm:ss")+"','"
-                                    +txtSoLuong.Text+"','"+txtThanhTien.Text+"')";
-                    ExecCRUD(query,"Thêm thành công Hóa đơn");
-
+                                    + txtMaKhach.Text + "','" + txbMaNV.Text + "','" + txbMaHang.Text + "','" + dtpNgayBan.Value.ToString("yyyy-MM-dd HH:mm:ss") + "','"
+                                    + soluong + "','" + thanhtien + "')";
                 
-                    UpdateStockQuantity(soluong,mahang);
+                    ExecCRUD(query, "Thêm thành công Hóa đơn");
+
+
+                    UpdateStockQuantity(soluong, mahang);
+
+
+                    CountAmount();
+                    Query(queryTable);
+                    UpdateCbTenHang();
+                    dtpNgayBan.Value = DateTime.Now;
 
                 }
-                CountAmount();
-                Query(queryTable);
-                dtpNgayBan.Value = DateTime.Now;
             }
         }
 
@@ -367,9 +379,8 @@ namespace quanlybanhang1
             CheckIDShowTextBox(queryName, cbTenNV, txbMaNV);
         }
 
-        private void cbTenHang_SelectedIndexChanged(object sender, EventArgs e)
+        private void UpdateCbTenHang()
         {
-            
             string queryName = "select mahh,GiaBan,soluong from hanghoa where tenhh like N'%" + cbTenHang.Text + "%'";
             try
             {
@@ -385,7 +396,7 @@ namespace quanlybanhang1
                 {
                     txbMaHang.Text = result.ToString();
 
-                   
+
                 }
 
                 SqlDataReader reader = cmd.ExecuteReader();
@@ -393,8 +404,11 @@ namespace quanlybanhang1
                 {
                     while (reader.Read())
                     {
-                        txtDonGiaBan.Text = reader["GiaBan"].ToString();
+                        dongia = int.Parse(reader["GiaBan"].ToString());
                         txbSLKho.Text = reader["soluong"].ToString();
+
+                        txtDonGiaBan.Text = string.Format("{0:#,##0}", dongia);
+
                     }
                 }
 
@@ -408,12 +422,16 @@ namespace quanlybanhang1
 
             }
 
-            dongia = int.Parse(txtDonGiaBan.Text);
-            soluong = int.Parse(txtSoLuong.Text);
+
             giamgia = int.Parse(txtGiamGia.Text);
             thanhtien = (soluong * dongia) - ((soluong * dongia * giamgia) / 100);
-            txtThanhTien.Text = thanhtien.ToString();
+            txtThanhTien.Text = string.Format("{0:#,##0}", thanhtien);
+        }
 
+        private void cbTenHang_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UpdateCbTenHang();
+            
         }
 
         private void cbTenKH_SelectedIndexChanged(object sender, EventArgs e)
@@ -466,7 +484,6 @@ namespace quanlybanhang1
         private void txtSoLuong_TextChanged(object sender, EventArgs e)
         {
 
-
             if (txtSoLuong.Text == "")
             {
                 return;
@@ -478,20 +495,19 @@ namespace quanlybanhang1
             }
             else
             {
+                soluong = int.Parse(txtSoLuong.Text);
+
                 int hangton = int.Parse(txbSLKho.Text);
-                int soluong = int.Parse(txtSoLuong.Text);
                 if (soluong > hangton)
                 {
                     MessageBox.Show("Trong kho còn " + hangton + " cái\nVui lòng không nhập quá số lượng trong kho");
-
+                    txtSoLuong.Text = "";
                 }
                 else
                 {
-                    dongia = int.Parse(txtDonGiaBan.Text);
-                    soluong = int.Parse(txtSoLuong.Text);
                     giamgia = int.Parse(txtGiamGia.Text);
                     thanhtien = (soluong * dongia) - ((soluong * dongia * giamgia) / 100);
-                    txtThanhTien.Text = thanhtien.ToString(); ;
+                    txtThanhTien.Text = string.Format("{0:#,##0}", thanhtien);
                 }
 
             }
@@ -499,6 +515,11 @@ namespace quanlybanhang1
 
         private void txtGiamGia_TextChanged(object sender, EventArgs e)
         {
+            if (txtGiamGia.Text == "")
+            {
+                return;
+            }
+
             if (cbTenHang.SelectedIndex == -1)
             {
                 MessageBox.Show("Bạn chưa chọn tên hàng");
@@ -506,11 +527,10 @@ namespace quanlybanhang1
             }
             else
             {
-                dongia = int.Parse(txtDonGiaBan.Text);
                 soluong = int.Parse(txtSoLuong.Text);
                 giamgia = int.Parse(txtGiamGia.Text);
                 thanhtien = (soluong * dongia) - ((soluong * dongia * giamgia) / 100);
-                txtThanhTien.Text = thanhtien.ToString();
+                txtThanhTien.Text = string.Format("{0:#,##0}", thanhtien);
             }
         }
 
@@ -552,9 +572,21 @@ namespace quanlybanhang1
         {
             if (CheckValidation())
             {
-                string query = @"update hoadon set makh='"+txtMaKhach.Text+"',manv='"+txbMaNV.Text+"',mahh='"+txbMaHang.Text+"',ngaylap='"+ dtpNgayBan.Value.ToString("yyyy-MM-dd HH:mm:ss") + "',soluong='"+txtSoLuong.Text+"',tongtien='"+txtTongTien.Text+"' where mahd='"+txtMaHDBan.Text+"'";
-                ExecCRUD(query,"Sửa thành công");        
+                int hangton = int.Parse(txbSLKho.Text);
 
+                int soluong = int.Parse(txtSoLuong.Text);
+                int mahang = int.Parse(txbMaHang.Text);
+
+                if (soluong > hangton)
+                {
+                    MessageBox.Show("Trong kho còn " + hangton + " cái\nVui lòng không nhập quá số lượng trong kho");
+                    txtSoLuong.Text = "";
+                }
+                else
+                {
+                    string query = @"update hoadon set makh='" + txtMaKhach.Text + "',manv='" + txbMaNV.Text + "',mahh='" + txbMaHang.Text + "',ngaylap='" + dtpNgayBan.Value.ToString("yyyy-MM-dd HH:mm:ss") + "',soluong='" + txtSoLuong.Text + "',tongtien='" + txtTongTien.Text + "' where mahd='" + txtMaHDBan.Text + "'";
+                    ExecCRUD(query, "Sửa thành công");
+                }
             }
         }
 
